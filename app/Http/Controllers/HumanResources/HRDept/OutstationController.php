@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 // load models
 use App\Models\HumanResources\HROutstation;
+use App\Models\HumanResources\HRAttendance;
 
 // for controller output
 use Illuminate\Http\RedirectResponse;
@@ -30,8 +31,8 @@ class OutstationController extends Controller
 	function __construct()
 	{
 		$this->middleware(['auth']);
-		$this->middleware('highMgmtAccess:1|2|4|5,14', ['only' => ['index', 'show']]);                                  // all high management
-		$this->middleware('highMgmtAccess:1|5,14', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);       // only hod and asst hod HR can access
+		$this->middleware('highMgmtAccess:1|2|5,6|14', ['only' => ['create', 'store', 'index', 'show']]);                                  // all high management
+		$this->middleware('highMgmtAccessLevel1:1|5,14', ['only' => ['edit', 'update', 'destroy']]);       // only hod and asst hod HR can access
 	}
 
 	/**
@@ -92,9 +93,15 @@ class OutstationController extends Controller
 	public function update(Request $request, HROutstation $outstation): RedirectResponse
 	{
 		// dd($request->all());
-		$outstation->update($request->only(['staff_id', 'customer_id', 'date_from', 'date_to', 'remarks']));
-		Session::flash('flash_message', 'Successfully edit staff for outstation');
-		return redirect()->route('outstation.index');
+		// $outstation->update($request->only(['customer_id', 'date_from', 'date_to', 'remarks']));
+		$outstation->update( Arr::add( $request->only(['customer_id', 'date_from', 'date_to']), 'remarks', ucwords(Str::lower($request->remarks))) );
+
+		// DELETE FROM TABLE ATTENDANCE
+		$r = HRAttendance::where('outstation_id', $outstation->id)->get();
+		foreach ($r as $c) {
+			HRAttendance::where('id', $c->id)->update(['outstation_id' => NULL]);
+		}
+		return redirect()->route('outstation.index')->with('flash_message', 'Successfully edit staff for outstation');
 	}
 
 	/**
@@ -102,7 +109,17 @@ class OutstationController extends Controller
 	 */
 	public function destroy(HROutstation $outstation): JsonResponse
 	{
+		// DELETE FROM TABLE ATTENDANCE
+		$r = HRAttendance::where('outstation_id', $outstation->id)->get();
+
+		foreach ($r as $c) {
+			HRAttendance::where('id', $c->id)->update(['outstation_id' => NULL]);
+		}
+
+		// DELETE AT TABLE OUTSTATION
 		$outstation->update(['active' => NULL]);
+
+		// RETURN MESSAGE
 		return response()->json([
 			'message' => 'Data deleted',
 			'status' => 'success'

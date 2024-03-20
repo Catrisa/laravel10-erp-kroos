@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<?php
+// load sql builder
+use Illuminate\Database\Eloquent\Builder;
+?>
 <style>
 	.btn-sm-custom {
 		padding: 0px;
@@ -12,10 +16,10 @@
 	}
 </style>
 
-<div class="container">
+<div class="container row align-items-start justify-content-center">
 	@include('humanresources.hrdept.navhr')
 	<h4>Replacement Leave&nbsp; <a class="btn btn-sm btn-outline-secondary" href="{{ route('rleave.create') }}"><i class="fa-solid fa-person-walking-arrow-loop-left fa-beat"></i> Add Replacement Leave</a></h4>
-	<div>
+	<div class="col-sm-12 row table-responsive">
 		<table id="replacement" class="table table-hover table-sm align-middle" style="font-size:12px">
 			<thead>
 				<tr>
@@ -28,6 +32,7 @@
 					<th>Total</th>
 					<th>Utilize</th>
 					<th>Balance</th>
+					<th>Replacement Leave</th>
 					<th>Remarks</th>
 					<th>Edit</th>
 					<th>Cancel</th>
@@ -36,8 +41,8 @@
 			<tbody>
 				@foreach ($replacements as $replacement)
 				<tr>
-					<td>{{ $replacement->belongstostaff->hasmanylogin()->where('logins.active', 1)->first()?->username }}</td>
-					<td class="text-truncate" style="max-width: 200px;" data-toggle="tooltip" title="{{ $replacement->belongstostaff->name }}">{{ $replacement->belongstostaff->name }}</td>
+					<td>{{ $replacement->belongstostaff?->hasmanylogin()->where('logins.active', 1)->first()?->username }}</td>
+					<td class="text-truncate" style="max-width: 200px;" data-toggle="tooltip" title="{{ $replacement->belongstostaff?->name }}">{{ $replacement->belongstostaff?->name }}</td>
 					<td>{{ \Carbon\Carbon::parse($replacement->date_start)->format('j M Y') }}</td>
 					<td>{{ \Carbon\Carbon::parse($replacement->date_end)->format('j M Y') }}</td>
 					<td class="text-truncate" style="max-width: 200px;" data-toggle="tooltip" title="{{ $replacement->belongstocustomer?->customer }}">{{ Str::limit($replacement->belongstocustomer?->customer, 10, '>') }}</td>
@@ -45,6 +50,15 @@
 					<td class="text-center">{{ $replacement->leave_total }}</td>
 					<td class="text-center">{{ $replacement->leave_utilize }}</td>
 					<td class="text-center">{{ $replacement->leave_balance }}</td>
+					<td class="text-center">
+						<?php
+						if ($replacement->belongstomanyleave()->count()) {
+							foreach ($replacement->belongstomanyleave()->get() as $val) {
+								echo '<a href="'.route('hrleave.show', $val->id).'">HR9-'.str_pad($val->leave_no, 5, "0", STR_PAD_LEFT ).'/'.$val->leave_year.'</a><br />';
+							}
+						}
+						?>
+					</td>
 					<td class="text-truncate" style="max-width: 100px;" data-toggle="tooltip" title="{{ $replacement->remarks }}">{{ Str::limit($replacement->remarks, 10, '>') }}</td>
 					<td class="text-center">
 						<a href="{{ route('rleave.edit', $replacement->id) }}" class="btn btn-sm btn-outline-secondary">
@@ -75,8 +89,7 @@
 $.fn.dataTable.moment( 'D MMM YYYY' );
 $.fn.dataTable.moment( 'h:mm a' );
 $('#replacement').DataTable({
-	"paging": false,
-	"lengthMenu": [ [10,25,50,-1], [10,25,50,"All"] ],
+	"lengthMenu": [ [100,250,500,-1], [100,250,500,"All"] ],
 	"columnDefs": [
 					{ type: 'date', 'targets': [2] },
 					{ type: 'time', 'targets': [3] },

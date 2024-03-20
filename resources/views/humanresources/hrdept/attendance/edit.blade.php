@@ -1,16 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
-
-
-
-
-
-
-
 <?php
 use \App\Models\HumanResources\HRLeave;
+use \App\Models\Staff;
 use \Illuminate\Database\Eloquent\Builder;
 
 $day_type = App\Models\HumanResources\OptDayType::pluck('daytype', 'id')->sortKeys()->toArray();
@@ -18,7 +11,8 @@ $day_type = App\Models\HumanResources\OptDayType::pluck('daytype', 'id')->sortKe
 
 $tcms = App\Models\HumanResources\OptTcms::pluck('leave_short', 'id')->sortKeys()->toArray();
 
-$staff = $attendance->belongstostaff;
+// $staff = $attendance->belongstostaff;
+$staff = Staff::find($attendance->staff_id);
 $login = $staff->hasmanylogin()->where('active', '1')->get()->first();
 
 if ($attendance->time_work_hour != NULL || $attendance->time_work_hour != '') {
@@ -29,11 +23,21 @@ if ($attendance->time_work_hour != NULL || $attendance->time_work_hour != '') {
 
 $dayName = \Carbon\Carbon::parse($attendance->attend_date)->format('l');
 
-if ($dayName == 'Friday') {
-	$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', 3)->first();
-} else {
-	$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', '!=', 3)->first();
+
+if ($staff->belongstomanydepartment()->wherePivot('main', 1)->first()->id == 19 || $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->id == 30) {		// maintenance staff
+	if ($dayName == 'Friday') {
+		$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', 7)->first();
+	} else {
+		$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', 8)->first();
+	}
+} else {																																								// non-maintenance staff
+	if ($dayName == 'Friday') {
+		$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', 3)->first();
+	} else {
+		$working_hour = $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup()->where('effective_date_start', '<=', $attendance->attend_date)->where('effective_date_end', '>=', $attendance->attend_date)->where('category', '!=', 3)->first();
+	}
 }
+// dd($working_hour, $staff->belongstomanydepartment()->wherePivot('main', 1)->first()->belongstowhgroup());
 
 $time_start_am = \Carbon\Carbon::parse($working_hour->time_start_am)->format('H:i');
 $time_end_am = \Carbon\Carbon::parse($working_hour->time_end_am)->format('H:i');
@@ -63,7 +67,7 @@ if ($leaves->count()) {
 
 ?>
 
-<div class="col-sm-12 row">
+<div class="container row align-items-start justify-content-center">
 	@include('humanresources.hrdept.navhr')
 	<div class="d-flex justify-content-center align-items-start">
 		<div class="col-md-7">
@@ -179,7 +183,7 @@ if ($leaves->count()) {
 					{!! Form::label( 'remarks', 'REMARK', ['class' => 'form-control border-0'] ) !!}
 				</div>
 				<div class="col-md-9 {{ $errors->has('remark') ? 'has-error' : '' }}">
-					{!! Form::text( 'remark', @$attendance->remark, ['class' => 'form-control', 'id' => 'remark', 'placeholder' => ''] ) !!}
+					{!! Form::text( 'remarks', @$attendance->remarks, ['class' => 'form-control', 'id' => 'remarks', 'placeholder' => ''] ) !!}
 				</div>
 			</div>
 

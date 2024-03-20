@@ -1,47 +1,139 @@
 <?php
+
 use App\Models\Staff;
+use App\Models\Login;
 use App\Models\HumanResources\HROvertimeRange;
 ?>
 @extends('layouts.app')
 
 @section('content')
-<div class="container justify-content-center align-items-start">
-@include('humanresources.hrdept.navhr')
+<style>
+	.scrollable-div {
+		/* Set the width height as needed */
+		/*		width: 100%;*/
+		height: 400px;
+		background-color: blanchedalmond;
+		/* Add scrollbars when content overflows */
+		overflow: auto;
+	}
+
+	p {
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+</style>
+
+<?php
+// who am i?
+$me1 = \Auth::user()->belongstostaff->div_id == 1;    // hod
+$me2 = \Auth::user()->belongstostaff->div_id == 5;    // hod assistant
+$me3 = \Auth::user()->belongstostaff->div_id == 4;    // supervisor
+$me4 = \Auth::user()->belongstostaff->div_id == 3;    // HR
+$me5 = \Auth::user()->belongstostaff->authorise_id == 1;  // admin
+$me6 = \Auth::user()->belongstostaff->div_id == 2;    // director
+$dept = \Auth::user()->belongstostaff->belongstomanydepartment()->wherePivot('main', 1)->first();
+$deptid = $dept->id;
+$branch = $dept->branch_id;
+$category = $dept->category_id;
+
+$staffs = Staff::join('logins', 'staffs.id', '=', 'logins.staff_id')
+->where('staffs.active', 1)
+->where('logins.active', 1)
+->where(function ($query) {
+	$query->where('staffs.div_id', '!=', 2)
+	->orWhereNull('staffs.div_id');
+})
+->select('staffs.id as staffID', 'staffs.*', 'logins.username')
+->orderBy('logins.username', 'asc')
+->get();
+?>
+
+<div class="col-sm-12 row">
+	@include('humanresources.hrdept.navhr')
+
 	<h4 class="align-items-start">Add Overtime Staff</h4>
+
 	{{ Form::open(['route' => ['overtime.store'], 'id' => 'form', 'class' => 'form-horizontal', 'autocomplete' => 'off', 'files' => true]) }}
 
-	<div class="row justify-content-center">
-		<div class="col-sm-6 gy-1 gx-1 align-items-start">
+	<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+		{{ Form::label( 'rel', 'Staff : ', ['class' => 'col-sm-2 col-form-label'] ) }}
+		<div class="col-md-10">
+			<div class="scrollable-div">
 
-			<div class="form-group row mb-3 {{ $errors->has('ot_date') ? 'has-error' : '' }}">
-				{{ Form::label( 'nam', 'Date Overtime : ', ['class' => 'col-sm-4 col-form-label'] ) }}
-				<div class="col-auto" style="position: relative;">
-					{{ Form::text('ot_date', @$value, ['class' => 'form-control form-control-sm col-auto', 'id' => 'nam', 'placeholder' => 'Date Overtime', 'autocomplete' => 'off']) }}
+				@if($staffs->count())
+				@foreach($staffs as $k)
+				<?php
+				if ($me1) { // hod
+					if ($deptid == 21) {                                // hod | dept prod A
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+					} elseif ($deptid == 28) {                              // hod | not dept prod A | dept prod B
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+					} elseif ($deptid == 14) {                              // hod | not dept prod A | not dept prod B | HR
+						$ha = true;
+					} elseif ($deptid == 6) {                              // hod | not dept prod A | not dept prod B | not HR | cust serv
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7;
+					} elseif ($deptid == 23) {                              // hod | not dept prod A | not dept prod B | not HR | not cust serv | puchasing
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 16 || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 17;
+					} else {                                      // hod | not dept prod A | not dept prod B | not HR | not cust serv | not puchasing | other dept
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid;
+					}
+				} elseif ($me2) {                                    // not hod | asst hod
+					if ($deptid == 14) {                                  // not hod | not dept prod A | not dept prod B | HR
+						$ha = true;
+					} elseif ($deptid == 6) {                              // not hod | not dept prod A | not dept prod B | not HR | cust serv
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7;
+					}
+				} elseif ($me3) {                                    // not hod | not asst hod | supervisor
+					if ($branch == 1) {                                  // not hod | not asst hod | supervisor | branch A
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || ($k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+					} elseif ($branch == 2) {                              // not hod | not asst hod | supervisor | not branch A | branch B
+						$ha = $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || ($k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && $k->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+					}
+				} elseif ($me6) {                                    // not hod | not asst hod | not supervisor | director
+					$ha = true;
+				} elseif ($me5) {                                    // not hod | not asst hod | not supervisor | not director | admin
+					$ha = true;
+				} else {
+					$ha = false;
+				}
+				?>
+				@if( $ha )
+				<div class="form-check mb-1 g-3">
+					<input class="form-check-input" name="staff_id[]" type="checkbox" value="{{ $k->staffID }}" id="staff_{{ $k->staffID }}">
+					<label class="form-check-label" for="staff_{{ $k->staffID }}">{{ $k->username }} - {{ $k->name }}</label>
 				</div>
+				@endif
+				@endforeach
+				@endif
 			</div>
-
-			<div class="form-group row mb-3 {{ $errors->has('overtime_range_id') ? 'has-error' : '' }}">
-				{{ Form::label( 'mar', 'Overtime : ', ['class' => 'col-sm-4 col-form-label'] ) }}
-				<div class="col-sm-8">
-					<select name="overtime_range_id" id="mar" class="form-select form-select-sm col-sm-8" placeholder="Please Select"></select>
-				</div>
-			</div>
-
-			<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">
-				{{ Form::label( 'rel', 'Staff : ', ['class' => 'col-sm-4 col-form-label'] ) }}
-				<div class="col-sm-8">
-					{{ Form::select('staff_id[]', Staff::where('active', 1)->pluck('name', 'id')->toArray(), @$value, ['class' => 'form-control form-select form-select-sm col-auto', 'id' => 'rel', 'autocomplete' => 'off', 'multiple', 'aria-describedby' => 'selectstaff']) }}
-					<div id="selectstaff" class="form-text">
-						You can select multiple staff
-					</div>
-				</div>
-			</div>
-
 		</div>
 	</div>
 
-	<div class="offset-5 mb-6">
-		{!! Form::submit('Add Overtime Staff', ['class' => 'btn btn-sm btn-outline-secondary']) !!}
+	<div class="form-group row mb-3 {{ $errors->has('overtime_range_id') ? 'has-error' : '' }}">
+		{{ Form::label( 'mar', 'Overtime : ', ['class' => 'col-sm-2 col-form-label'] ) }}
+		<div class="col-sm-10">
+			<select name="overtime_range_id" id="mar" class="form-select form-select-sm col-sm-8" placeholder="Please Select"></select>
+		</div>
+	</div>
+
+	<div class="form-group row mb-3 {{ $errors->has('ot_date') ? 'has-error' : '' }}">
+		{{ Form::label( 'nam', 'Date Overtime : ', ['class' => 'col-sm-2 col-form-label'] ) }}
+		<div class="col-md-10" style="position: relative">
+			{{ Form::text('ot_date', @$value, ['class' => 'form-control form-control-sm col-auto', 'id' => 'nam', 'placeholder' => 'Date Overtime', 'autocomplete' => 'off']) }}
+		</div>
+	</div>
+
+	<div class="form-group row mb-3 {{ $errors->has('ot_date') ? 'has-error' : '' }}">
+		{{ Form::label( 'rem', 'Remarks : ', ['class' => 'col-sm-2 col-form-label'] ) }}
+		<div class="col-sm-10">
+			{{ Form::textarea('remark', @$value, ['class' => 'form-control form-control-sm col-auto', 'id' => 'rem', 'placeholder' => 'Remarks', 'autocomplete' => 'off', 'cols' => '120', 'rows' => '3']) }}
+		</div>
+	</div>
+
+	<div class="form-group row mb-3 g-3 p-2">
+		<div class="col-sm-10 offset-sm-2">
+			{!! Form::submit('Add Overtime Staff', ['class' => 'btn btn-sm btn-outline-secondary']) !!}
+		</div>
 	</div>
 
 	{{ Form::close() }}
@@ -116,7 +208,7 @@ $('#nam').datetimepicker({
 	format: 'YYYY-MM-DD',
 	useCurrent: true,
 	@if( $pos == 4 || ($pos == 1 && $dept->department_id == 21) )
-		minDate: moment().format(),
+	minDate: moment().format(),
 	@endif
 }).on("dp.change", function (e) {
 	$('#form').bootstrapValidator('revalidateField', 'ot_date');

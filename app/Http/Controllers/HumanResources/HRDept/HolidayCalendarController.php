@@ -39,8 +39,8 @@ class HolidayCalendarController extends Controller
 	function __construct()
 	{
 		$this->middleware(['auth']);
-		$this->middleware('highMgmtAccess:1|2|4|5,14', ['only' => ['index', 'show']]);
-		$this->middleware('highMgmtAccess:1|5,14', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);
+		$this->middleware('highMgmtAccess:1|2|5,14|31', ['only' => ['index', 'show']]);
+		$this->middleware('highMgmtAccessLevel1:1,14', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);
 	}
 
 
@@ -73,9 +73,10 @@ class HolidayCalendarController extends Controller
 	/**
 	 * Display the specified resource.
 	 */
-	public function show(HRHolidayCalendar $holidaycalendar):View
+	public function show(HRHolidayCalendar $holidaycalendar)
 	{
-		//
+		$holidays = HRHolidayCalendar::whereYear('date_start', $holidaycalendar)->orderBy('date_start', 'asc')->get();
+		return view('humanresources.holidaycalendar.show', ['holidays' => $holidays, 'holidaycalendar' => $holidaycalendar]);
 	}
 
 	/**

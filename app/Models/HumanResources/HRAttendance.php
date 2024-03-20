@@ -4,6 +4,7 @@ namespace App\Models\HumanResources;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Model;
 
 // db relation class to load
@@ -17,21 +18,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class HRAttendance extends Model
 {
-	use HasFactory;
+	use HasFactory, SoftDeletes;
 
 	// protected $connection = 'mysql';
 	protected $table = 'hr_attendances';
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// hasmany relationship
-	public function hasmanyovertime(): HasMany
-	{
-		return $this->hasMany(\App\Models\HumanResources\HROvertime::class, 'attendance_id');
-	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// db relation belongsToMany
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
 	//belongsto relationship
 	public function belongstostaff(): BelongsTo
 	{
@@ -52,6 +44,14 @@ class HRAttendance extends Model
 	{
 		return $this->belongsTo(\App\Models\HumanResources\OptDayType::class, 'daytype_id');
 	}
+
+	public function belongstooutstation(): BelongsTo
+	{
+		return $this->belongsTo(\App\Models\HumanResources\HROutstation::class, 'outstation_id');
+	}
+
+	public function belongstoovertime(): BelongsTo
+	{
+		return $this->belongsTo(\App\Models\HumanResources\HROvertime::class, 'overtime_id');
+	}
 }
-
-

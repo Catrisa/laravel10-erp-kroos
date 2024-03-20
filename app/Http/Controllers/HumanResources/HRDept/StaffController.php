@@ -9,9 +9,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 // load models
 use App\Models\Staff;
+use App\Models\HumanResources\HRAttendance;
 
 // load validation
 use App\Http\Requests\HumanResources\Leave\HRLeaveRequestStore;
@@ -34,8 +37,8 @@ class StaffController extends Controller
 	function __construct()
 	{
 		$this->middleware(['auth']);
-		$this->middleware('highMgmtAccess:1|2|4|5,NULL', ['only' => ['index', 'show']]);								// all high management
-		$this->middleware('highMgmtAccess:1|5,14', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);		// only hod and asst hod HR can access
+		$this->middleware('highMgmtAccess:1|2|4|5,NULL', ['only' => ['index', 'show']]);								// all high management (use NULL for all access some parts if there is other)
+		$this->middleware('highMgmtAccessLevel1:1|5,14', ['only' => ['create', 'store', 'edit', 'update', 'destroy']]);		// only hod and asst hod HR can access
 	}
 
 	/**
@@ -57,10 +60,11 @@ class StaffController extends Controller
 	/**
 	 * Store a newly created resource in storage.
 	 */
-	public function store(StaffRequestStore $request)/*: RedirectResponse*/
+	public function store(StaffRequestStore $request): RedirectResponse
 	{
 		// dd($request->all());
 		$data = $request->only(['ic', 'religion_id', 'gender_id', 'race_id', 'nationality_id', 'marital_status_id', 'mobile', 'phone', 'dob', 'cimb_account', 'epf_account', 'income_tax_no', 'socso_no', 'weight', 'height', 'join', 'div_id', 'restday_group_id', 'leave_flow_id', 'status_id', 'active', 'authorise_id']);
+		$data += ['join' => now()];
 		$data += ['active' => 1];
 		$data += ['name' => ucwords(Str::of($request->name)->lower())];
 		$data += ['address' => ucwords(Str::of($request->address)->lower())];
@@ -85,7 +89,7 @@ class StaffController extends Controller
 		}
 
 		$signin = $request->only(['password']);
-		$signin += ['username' => Str::of($request->address)->upper()];
+		$signin += ['username' => Str::of($request->username)->upper()];
 		$signin += ['active' => 1];
 
 		$s = Staff::create($data);
@@ -102,11 +106,13 @@ class StaffController extends Controller
 																					'mc_leave' => $request->mc_leave,
 																					'mc_leave_balance' => $request->mc_leave,
 																				]);
-		$s->hasmanyleavematernity()->whereYear('year', now())->updateOrCreate([
-																					'year' => Carbon::now()->format('Y'),
-																					'maternity_leave' => $request->maternity_leave,
-																					'maternity_leave_balance' => $request->maternity_leave,
-																				]);
+		if ($request->gender_id == 2) {
+			$s->hasmanyleavematernity()->whereYear('year', now())->updateOrCreate([
+																						'year' => Carbon::now()->format('Y'),
+																						'maternity_leave' => $request->maternity_leave,
+																						'maternity_leave_balance' => $request->maternity_leave,
+																					]);
+		}
 		if ($request->has('crossbackup')) {
 			foreach ($request->crossbackup as $k => $v) {
 				$s->crossbackupto()->attach([
@@ -132,19 +138,36 @@ class StaffController extends Controller
 				$s->hasmanyemergency()->create($v);
 			}
 		}
-
-		// Session::flash('flash_danger', 'Please make sure your applied leave does not exceed your available leave balance');
-		// return redirect()->back();
-		Session::flash('flash_message', 'Successfully Add New Staff.');
-		return redirect()->route('staff.index');
+		return redirect()->route('staff.index')->with('flash_message', 'Successfully Add New Staff.');
 	}
 
 	/**
 	 * Display the specified resource.
 	 */
-	public function show(Staff $staff): View
+	public function show(Request $request, Staff $staff): View
 	{
-		return view('humanresources.hrdept.staff.show', compact(['staff']));
+		$current_time = now();
+		$current_year = $current_time->format('Y');
+		$current_month = $current_time->format('m');
+
+		if ($request->year != NULL && $request->month != NULL) {
+			$year = $request->year;
+			$month = $request->month;
+		} else {
+			$year = $current_year;
+			$month = $current_month;
+		}
+
+		$attendance = HRAttendance::join('staffs', 'hr_attendances.staff_id', '=', 'staffs.id')
+			->where('hr_attendances.staff_id', $staff->id)
+			->whereYear('hr_attendances.attend_date', '=', $year)
+			->whereMonth('hr_attendances.attend_date', '=', $month)
+			->select('hr_attendances.remarks as attend_remark', 'hr_attendances.*', 'staffs.*')
+			->get();
+
+		$wh_group = $staff->belongstomanydepartment()->wherePivot('main', 1)->first();
+
+		return view('humanresources.hrdept.staff.show', ['staff' => $staff, 'attendance' => $attendance, 'wh_group' => $wh_group->wh_group_id, 'year' => $year, 'month' => $month]);
 	}
 
 	/**
@@ -207,39 +230,37 @@ class StaffController extends Controller
 			$staff->hasmanylogin()->update(['active' => 0]);																										// disable old login
 			if (!$request->password) {																																// create new login
 				$staff->hasmanylogin()->create([
-					'username' => $request->username,
+					'username' => Str::upper($request->username),
 					'password' => $staff->hasmanylogin()->where('active', 0)->first()->password,
 				]);
-				$staff->update(['status_id' => $request->status_id]);
+				$staff->update(['status_id' => $request->status_id, 'confirmed' => now()]);
 			} else {
 				$staff->hasmanylogin()->update($login);
 				$staff->update(['status_id' => $request->status_id]);
 			}
 		}
 
-		$staff->belongstomanydepartment()->sync($request->only(['pivot_dept_id']), ['main' => 1]);
-		$staff->crossbackupto()->sync($request->only(['backup_staff_id'], ['active' => 1]));
-		$staff->hasmanyleaveannual()->whereYear('year', now())->updateOrCreate([
-																					'year' => Carbon::now()->format('Y'),
-																					'annual_leave' => $request->annual_leave,
-																					'annual_leave_balance' => $request->annual_leave,
-																				]);
-		$staff->hasmanyleavemc()->whereYear('year', now())->updateOrCreate([
-																					'year' => Carbon::now()->format('Y'),
-																					'mc_leave' => $request->mc_leave,
-																					'mc_leave_balance' => $request->mc_leave,
-																				]);
-		$staff->hasmanyleavematernity()->whereYear('year', now())->updateOrCreate([
-																					'year' => Carbon::now()->format('Y'),
-																					'maternity_leave' => $request->maternity_leave,
-																					'maternity_leave_balance' => $request->maternity_leave,
-																				]);
+		// $staff->belongstomanydepartment()->sync($request->only(['pivot_dept_id']), ['main' => 1]);
+		$staff->belongstomanydepartment()->syncWithPivotValues($request->only(['pivot_dept_id']), ['main' => 1]);
 		if ($request->has('crossbackup')) {
 			// syncWithPivotValues([1, 2, 3], ['active' => true])
 			foreach ($request->crossbackup as $k => $v) {
 				$staff->crossbackupto()->syncWithoutDetaching([$v['backup_staff_id'] => ['active' => 1]]);
 			}
 		}
+
+		// $staff->hasmanyleaveannual()->whereYear('year', now())->updateOrCreate([
+		// 																			'year' => Carbon::now()->format('Y'),
+		// 																			'annual_leave' => $request->annual_leave,
+		// 																		]);
+		// $staff->hasmanyleavemc()->whereYear('year', now())->updateOrCreate([
+		// 																			'year' => Carbon::now()->format('Y'),
+		// 																			'mc_leave' => $request->mc_leave,
+		// 																		]);
+		// $staff->hasmanyleavematernity()->whereYear('year', now())->updateOrCreate([
+		// 																			'year' => Carbon::now()->format('Y'),
+		// 																			'maternity_leave' => $request->maternity_leave,
+		// 																		]);
 
 
 

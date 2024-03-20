@@ -37,8 +37,6 @@ class HRLeaveController extends Controller
 	function __construct()
 	{
 		$this->middleware('auth');
-		// $this->middleware('leaveaccess', ['only' => ['show', 'edit', 'update']]);
-		$this->middleware('highMgmtAccess:1|5,14', ['only' => ['edit', 'update', 'destroy']]);
 	}
 
 	/**
@@ -127,7 +125,7 @@ class HRLeaveController extends Controller
 		// AL & EL-AL
 		if($request->leave_type_id == 1 || $request->leave_type_id == 5) {
 			// check entitlement if configured or not
-			$entitlement = $user->hasmanyleaveannual()->where('year', $daStart->year)->first();
+			$entitlement = $user->hasmanyleaveannual()?->where('year', $daStart->year)->first();
 			// if(!$entitlement) {																													// kick him out if there is no entitlement been configured for entitlement
 			// 	Session::flash('flash_danger', 'Please contact with your Human Resources Manager. Most probably, HR havent configured yet your entitlement.');
 			// 	return redirect()->back();
@@ -142,7 +140,7 @@ class HRLeaveController extends Controller
 						$time = explode( '/', $request->half_type_id );
 
 						$data = $request->only(['leave_type_id', 'leave_cat']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['half_type_id' => $time[0]];
 						$data += ['date_time_start' => $request->date_time_start.' '.$time[1]];
@@ -166,21 +164,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleaveannual()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleaveannual()->where('year', $daStart->year)->update(['annual_leave_balance' => $entitle, 'annual_leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																								// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -193,7 +191,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->annual_leave_utilize + 1;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end', 'half_type_id']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => 1];
 						$data += ['leave_no' => $row];
@@ -222,21 +220,21 @@ class HRLeaveController extends Controller
 						// dd($c);
 						// $c->update(['annual_leave_balance' => $entitle, 'annual_leave_utilize' => $utilize]);
 
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -251,7 +249,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->annual_leave_utilize + $totalday;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => $totalday];
 						$data += ['leave_no' => $row];
@@ -272,21 +270,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleaveannual()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleaveannual()->where('year', $daStart->year)->update(['annual_leave_balance' => $entitle, 'annual_leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {																														// annual_leave_balance < $totalday, then exit
@@ -318,7 +316,7 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason)),
+									'reason' => ucwords(Str::lower($request->reason)),
 									'softcopy' => $fileName
 								];
 							} else {
@@ -331,28 +329,28 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason))
+									'reason' => ucwords(Str::lower($request->reason))
 								];
 							}
 
 							$l = $user->hasmanyleave()->create($data);																				// insert data into HRLeave
 							$l->belongstomanyleaveannual()->attach($entitlement->id);									// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 
-							if($user->belongstoleaveapprovalflow->backup_approval == 1){															// alert backup
+							if($user->belongstoleaveapprovalflow?->backup_approval == 1){															// alert backup
 								if($request->staff_id) {																							// backup only valid for non EL leave
 									$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 								}
 							}
-							if($user->belongstoleaveapprovalflow->supervisor_approval == 1){														// alert supervisor
+							if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){														// alert supervisor
 								$l->hasmanyleaveapprovalsupervisor()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hod_approval == 1){																// alert hod
+							if($user->belongstoleaveapprovalflow?->hod_approval == 1){																// alert hod
 								$l->hasmanyleaveapprovalhod()->create();
 							}
-							if($user->belongstoleaveapprovalflow->director_approval == 1){															// alert director
+							if($user->belongstoleaveapprovalflow?->director_approval == 1){															// alert director
 								$l->hasmanyleaveapprovaldir()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hr_approval == 1){																// alert hr
+							if($user->belongstoleaveapprovalflow?->hr_approval == 1){																// alert hr
 								$l->hasmanyleaveapprovalhr()->create();
 							}
 						}
@@ -373,7 +371,7 @@ class HRLeaveController extends Controller
 						$time = explode( '/', $request->half_type_id );
 
 						$data = $request->only(['leave_type_id', 'leave_cat']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['half_type_id' => $time[0]];
 						$data += ['verify_code' => $code];
 						$data += ['date_time_start' => $request->date_time_start.' '.$time[1]];
@@ -396,21 +394,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// update mc_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {
@@ -422,7 +420,7 @@ class HRLeaveController extends Controller
 						// $entitle = $entitlement->mc_balance - 1;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end', 'half_type_id']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => 1];
 						$data += ['leave_no' => $row];
@@ -442,21 +440,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// substract mc_balance
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {
@@ -470,7 +468,7 @@ class HRLeaveController extends Controller
 						// $entitle = $entitlement->mc_balance - $totalday;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => $totalday];
 						$data += ['leave_no' => $row];
@@ -490,21 +488,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// substract mc_balance
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {																														// mc_balance < $totalday, then exit
@@ -536,7 +534,7 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason)),
+									'reason' => ucwords(Str::lower($request->reason)),
 									'softcopy' => $fileName
 								];
 							} else {
@@ -549,26 +547,26 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason))
+									'reason' => ucwords(Str::lower($request->reason))
 								];
 							}
 
 							$l = $user->hasmanyleave()->create($data);																				// insert data into HRLeave
-							if($user->belongstoleaveapprovalflow->backup_approval == 1){															// alert backup
+							if($user->belongstoleaveapprovalflow?->backup_approval == 1){															// alert backup
 								if($request->staff_id) {																							// backup only valid for non EL leave
 									$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 								}
 							}
-							if($user->belongstoleaveapprovalflow->supervisor_approval == 1){														// alert supervisor
+							if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){														// alert supervisor
 								$l->hasmanyleaveapprovalsupervisor()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hod_approval == 1){																// alert hod
+							if($user->belongstoleaveapprovalflow?->hod_approval == 1){																// alert hod
 								$l->hasmanyleaveapprovalhod()->create();
 							}
-							if($user->belongstoleaveapprovalflow->director_approval == 1){															// alert director
+							if($user->belongstoleaveapprovalflow?->director_approval == 1){															// alert director
 								$l->hasmanyleaveapprovaldir()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hr_approval == 1){																// alert hr
+							if($user->belongstoleaveapprovalflow?->hr_approval == 1){																// alert hr
 								$l->hasmanyleaveapprovalhr()->create();
 							}
 						}
@@ -600,7 +598,7 @@ class HRLeaveController extends Controller
 						$time = explode( '/', $request->half_type_id );
 
 						$data = $request->only(['leave_type_id', 'leave_cat']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['half_type_id' => $time[0]];
 						$data += ['verify_code' => $code];
 						$data += ['date_time_start' => $request->date_time_start.' '.$time[1]];
@@ -624,21 +622,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavemc()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavemc()->where('year', $daStart->year)->update(['mc_leave_balance' => $entitle, 'mc_leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -651,7 +649,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->mc_leave_utilize + 1;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end', 'half_type_id']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => 1];
 						$data += ['leave_no' => $row];
@@ -672,21 +670,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavemc()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavemc()->where('year', $daStart->year)->update(['mc_leave_balance' => $entitle, 'mc_leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																								// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -701,7 +699,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->mc_leave_utilize + $totalday;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => $totalday];
 						$data += ['leave_no' => $row];
@@ -722,21 +720,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavemc()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavemc()->where('year', $daStart->year)->update(['mc_leave_balance' => $entitle, 'mc_leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {																														// mc_leave_balance < $totalday, then exit
@@ -769,7 +767,7 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason)),
+									'reason' => ucwords(Str::lower($request->reason)),
 									'softcopy' => $fileName
 								];
 							} else {
@@ -782,27 +780,27 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason))
+									'reason' => ucwords(Str::lower($request->reason))
 								];
 							}
 
 							$l = $user->hasmanyleave()->create($data);																				// insert data into HRLeave
 							$l->belongstomanyleavemc()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
-							if($user->belongstoleaveapprovalflow->backup_approval == 1){															// alert backup
+							if($user->belongstoleaveapprovalflow?->backup_approval == 1){															// alert backup
 								if($request->staff_id) {																							// backup only valid for non EL leave
 									$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 								}
 							}
-							if($user->belongstoleaveapprovalflow->supervisor_approval == 1){														// alert supervisor
+							if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){														// alert supervisor
 								$l->hasmanyleaveapprovalsupervisor()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hod_approval == 1){																// alert hod
+							if($user->belongstoleaveapprovalflow?->hod_approval == 1){																// alert hod
 								$l->hasmanyleaveapprovalhod()->create();
 							}
-							if($user->belongstoleaveapprovalflow->director_approval == 1){															// alert director
+							if($user->belongstoleaveapprovalflow?->director_approval == 1){															// alert director
 								$l->hasmanyleaveapprovaldir()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hr_approval == 1){																// alert hr
+							if($user->belongstoleaveapprovalflow?->hr_approval == 1){																// alert hr
 								$l->hasmanyleaveapprovalhr()->create();
 							}
 						}
@@ -836,7 +834,7 @@ class HRLeaveController extends Controller
 						$time = explode( '/', $request->half_type_id );
 
 						$data = $request->only(['leave_type_id', 'leave_cat']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['half_type_id' => $time[0]];
 						$data += ['date_time_start' => $request->date_time_start.' '.$time[1]];
@@ -860,21 +858,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavereplacement()->attach($request->id);					// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavereplacement()->where('id', $request->id)->update(['leave_balance' => $entitle, 'leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																								// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -887,7 +885,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->leave_utilize + 1;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => 1];
 						$data += ['leave_no' => $row];
@@ -908,21 +906,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavereplacement()->attach($request->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavereplacement()->where('id', $request->id)->update(['leave_balance' => $entitle, 'leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {
@@ -937,7 +935,7 @@ class HRLeaveController extends Controller
 						$utilize = $entitlement->leave_utilize + $totalday;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => $totalday];
 						$data += ['leave_no' => $row];
@@ -958,21 +956,21 @@ class HRLeaveController extends Controller
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						$l->belongstomanyleavereplacement()->attach($request->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 						$user->hasmanyleavereplacement()->where('id', $request->id)->update(['leave_balance' => $entitle, 'leave_utilize' => $utilize]);		// update leave_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																								// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					} else {																														// leave_balance < $totalday, then exit
@@ -1005,7 +1003,7 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason)),
+									'reason' => ucwords(Str::lower($request->reason)),
 									'softcopy' => $fileName
 								];
 							} else {
@@ -1018,28 +1016,28 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason))
+									'reason' => ucwords(Str::lower($request->reason))
 								];
 							}
 
 							$l = $user->hasmanyleave()->create($data);																				// insert data into HRLeave
 							$l->belongstomanyleavereplacement()->attach($request->id);									// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 							$user->hasmanyleavereplacement()->where('id', $request->id)->update(['leave_balance' => $entitle, 'leave_utilize' => $utilize]);		// update leave_balance by substarct
-							if($user->belongstoleaveapprovalflow->backup_approval == 1){															// alert backup
+							if($user->belongstoleaveapprovalflow?->backup_approval == 1){															// alert backup
 								if($request->staff_id) {																							// backup only valid for non EL leave
 									$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 								}
 							}
-							if($user->belongstoleaveapprovalflow->supervisor_approval == 1){														// alert supervisor
+							if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){														// alert supervisor
 								$l->hasmanyleaveapprovalsupervisor()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hod_approval == 1){																// alert hod
+							if($user->belongstoleaveapprovalflow?->hod_approval == 1){																// alert hod
 								$l->hasmanyleaveapprovalhod()->create();
 							}
-							if($user->belongstoleaveapprovalflow->director_approval == 1){															// alert director
+							if($user->belongstoleaveapprovalflow?->director_approval == 1){															// alert director
 								$l->hasmanyleaveapprovaldir()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hr_approval == 1){																// alert hr
+							if($user->belongstoleaveapprovalflow?->hr_approval == 1){																// alert hr
 								$l->hasmanyleaveapprovalhr()->create();
 							}
 						}
@@ -1064,7 +1062,7 @@ class HRLeaveController extends Controller
 				$entitle = $entitlement->maternity_leave_balance - $totalday;
 				$utilize = $entitlement->maternity_leave_utilize + $totalday;
 				$data = $request->only(['leave_type_id', 'date_time_start', 'date_time_end']);
-				$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+				$data += ['reason' => ucwords(Str::lower($request->reason))];
 				$data += ['verify_code' => $code];
 				$data += ['period_day' => $totalday];
 				$data += ['leave_no' => $row];
@@ -1086,21 +1084,21 @@ class HRLeaveController extends Controller
 				$l->belongstomanyleavematernity()->attach($entitlement->id);										// it should be leave_replacement_id but im lazy to change it at view humanresources/create.blade.php
 				$user->hasmanyleavematernity()->where('year', $daStart->year)->update(['maternity_leave_balance' => $entitle, 'maternity_leave_utilize' => $utilize]);		// update leave_balance by substarct
 
-				if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+				if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 					if($request->staff_id) {																								// backup only valid for non EL leave
 						$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 					}
 				}
-				if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+				if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 					$l->hasmanyleaveapprovalsupervisor()->create();
 				}
-				if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+				if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 					$l->hasmanyleaveapprovalhod()->create();
 				}
-				if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+				if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 					$l->hasmanyleaveapprovaldir()->create();
 				}
-				if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+				if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 					$l->hasmanyleaveapprovalhr()->create();
 				}
 			} else {
@@ -1162,6 +1160,7 @@ class HRLeaveController extends Controller
 			$totalwh = Arr::collapse([$timeawh1, $timeawh2]);
 			$totalwhmins = count($totalwh);
 
+			// need to check on maintenance team
 			foreach($totalwh as $k1){
 				foreach($timeuser as $k2){
 					if ( Carbon::parse($k1)->EqualTo(Carbon::parse($k2)) ) {
@@ -1184,7 +1183,7 @@ class HRLeaveController extends Controller
 			// echo $t;
 
 			$data = $request->only(['leave_type_id']);
-			$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+			$data += ['reason' => ucwords(Str::lower($request->reason))];
 			$data += ['verify_code' => $code];
 			$data += ['date_time_start' => $ts];
 			$data += ['date_time_end' => $te];
@@ -1204,21 +1203,21 @@ class HRLeaveController extends Controller
 				$data += ['softcopy' => $fileName];
 			}
 			$l = $user->hasmanyleave()->create($data);
-			if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+			if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 				if($request->staff_id) {																								// backup only valid for non EL leave
 					$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 				}
 			}
-			if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+			if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 				$l->hasmanyleaveapprovalsupervisor()->create();
 			}
-			if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+			if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 				$l->hasmanyleaveapprovalhod()->create();
 			}
-			if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+			if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 				$l->hasmanyleaveapprovaldir()->create();
 			}
-			if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+			if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 				$l->hasmanyleaveapprovalhr()->create();
 			}
 		}
@@ -1241,7 +1240,7 @@ class HRLeaveController extends Controller
 						$time = explode( '/', $request->half_type_id );
 
 						$data = $request->only(['leave_type_id', 'leave_cat']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['half_type_id' => $time[0]];
 						$data += ['verify_code' => $code];
 						$data += ['date_time_start' => $request->date_time_start.' '.$time[1]];
@@ -1264,21 +1263,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// update mc_balance by substarct
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {
@@ -1290,7 +1289,7 @@ class HRLeaveController extends Controller
 						// $entitle = $entitlement->mc_balance - 1;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end', 'half_type_id']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => 1];
 						$data += ['leave_no' => $row];
@@ -1310,21 +1309,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// substract mc_balance
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {
@@ -1338,7 +1337,7 @@ class HRLeaveController extends Controller
 						// $entitle = $entitlement->mc_balance - $totalday;
 
 						$data = $request->only(['leave_type_id', 'leave_cat', 'date_time_start', 'date_time_end']);
-						$data += ['reason' => Str::ucfirst(Str::lower($request->reason))];
+						$data += ['reason' => ucwords(Str::lower($request->reason))];
 						$data += ['verify_code' => $code];
 						$data += ['period_day' => $totalday];
 						$data += ['leave_no' => $row];
@@ -1358,21 +1357,21 @@ class HRLeaveController extends Controller
 
 						$l = $user->hasmanyleave()->create($data);																					// insert data into HRLeave
 						// $user->hasmanyleaveentitlement()->where('year', $daStart->year)->update(['mc_balance' => $entitle]);						// substract mc_balance
-						if($user->belongstoleaveapprovalflow->backup_approval == 1){																// alert backup
+						if($user->belongstoleaveapprovalflow?->backup_approval == 1){																// alert backup
 							if($request->staff_id) {																						// backup only valid for non EL leave
 								$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 							}
 						}
-						if($user->belongstoleaveapprovalflow->supervisor_approval == 1){															// alert supervisor
+						if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){															// alert supervisor
 							$l->hasmanyleaveapprovalsupervisor()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hod_approval == 1){																	// alert hod
+						if($user->belongstoleaveapprovalflow?->hod_approval == 1){																	// alert hod
 							$l->hasmanyleaveapprovalhod()->create();
 						}
-						if($user->belongstoleaveapprovalflow->director_approval == 1){																// alert director
+						if($user->belongstoleaveapprovalflow?->director_approval == 1){																// alert director
 							$l->hasmanyleaveapprovaldir()->create();
 						}
-						if($user->belongstoleaveapprovalflow->hr_approval == 1){																	// alert hr
+						if($user->belongstoleaveapprovalflow?->hr_approval == 1){																	// alert hr
 							$l->hasmanyleaveapprovalhr()->create();
 						}
 					// } else {																														// mc_balance < $totalday, then exit
@@ -1404,7 +1403,7 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason)),
+									'reason' => ucwords(Str::lower($request->reason)),
 									'softcopy' => $fileName
 								];
 							} else {
@@ -1417,26 +1416,26 @@ class HRLeaveController extends Controller
 									'leave_year' => $ye,
 									'leave_cat' => $request->leave_cat,
 									'leave_type_id' => $request->leave_type_id,
-									'reason' => Str::ucfirst(Str::lower($request->reason))
+									'reason' => ucwords(Str::lower($request->reason))
 								];
 							}
 
 							$l = $user->hasmanyleave()->create($data);																				// insert data into HRLeave
-							if($user->belongstoleaveapprovalflow->backup_approval == 1){															// alert backup
+							if($user->belongstoleaveapprovalflow?->backup_approval == 1){															// alert backup
 								if($request->staff_id) {																							// backup only valid for non EL leave
 									$l->hasmanyleaveapprovalbackup()->create($request->only(['staff_id']));
 								}
 							}
-							if($user->belongstoleaveapprovalflow->supervisor_approval == 1){														// alert supervisor
+							if($user->belongstoleaveapprovalflow?->supervisor_approval == 1){														// alert supervisor
 								$l->hasmanyleaveapprovalsupervisor()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hod_approval == 1){																// alert hod
+							if($user->belongstoleaveapprovalflow?->hod_approval == 1){																// alert hod
 								$l->hasmanyleaveapprovalhod()->create();
 							}
-							if($user->belongstoleaveapprovalflow->director_approval == 1){															// alert director
+							if($user->belongstoleaveapprovalflow?->director_approval == 1){															// alert director
 								$l->hasmanyleaveapprovaldir()->create();
 							}
-							if($user->belongstoleaveapprovalflow->hr_approval == 1){																// alert hr
+							if($user->belongstoleaveapprovalflow?->hr_approval == 1){																// alert hr
 								$l->hasmanyleaveapprovalhr()->create();
 							}
 						}

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Model;
 use App\Models\Model;
 
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
-	use HasFactory;
+	use HasFactory, SoftDeletes;
 	// protected $connection = 'mysql';
 	protected $table = 'customers';
 
@@ -31,6 +32,11 @@ class Customer extends Model
 	public function hasmanyoutstation(): HasMany
 	{
 		return $this->hasMany(\App\Models\HumanResources\HROutstation::class, 'customer_id');
+	}
+
+	public function hasmanysales(): HasMany
+	{
+		return $this->hasMany(\App\Models\Sales\Sales::class, 'customer_id');
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

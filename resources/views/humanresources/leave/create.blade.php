@@ -1,18 +1,24 @@
 @extends('layouts.app')
 @section('content')
-<div class="col-sm-12">
-	<div class="table-responsive col-auto">
+<div class="container row align-items-start justify-content-center">
+	<div class="table-responsive col-sm-12 m-5">
 		<table class="table table-hover table-sm">
 			<tbody>
-				<tr>
-					<td rowspan="3" class="text-danger col-sm-2">Attention :</td>
-					<td>Leave application must be at least <span class="font-weight-bold">THREE (3)</span> days in advance for <strong>"Annual Leave"</strong> and <strong>"Unpaid Leave"</strong>. Otherwise it will be considered as <strong>"Emergency Annual Leave"</strong> or <strong>"Emergency Unpaid Leave"</strong></td>
+				<tr class="">
+					<td rowspan="3" class="text-danger w-25">Attention :</td>
+					<td>
+						Leave application must be at least <span class="font-weight-bold">THREE (3)</span> days in advance for <strong>"Annual Leave"</strong> and <strong>"Unpaid Leave"</strong>. Otherwise it will be considered as <strong>"Emergency Annual Leave"</strong> or <strong>"Emergency Unpaid Leave"</strong>
+					</td>
 				</tr>
 				<tr>
-					<td><strong>"Time-Off"</strong> will consider as a <strong>"Leave"</strong>, if leave period exceed <strong>more than 2 hours</strong>.</td>
+					<td>
+            <strong>"Time-Off"</strong> will consider as a <strong>"Leave"</strong>, if leave period exceed <strong>more than 2 hours</strong>.
+          </td>
 				</tr>
 				<tr>
-					<td>Application for <strong>"Sick Leave/Medical Certificate (MC)"</strong> or <strong>"Unpaid Medical Certificate (MC-UPL)"</strong> will only be <strong>considered VALID and ELIGIBLE</strong> if a sick/medical certificate is <strong>issued by a REGISTERED government hospital/clinic or panel clinic only.</td>
+					<td>
+						Application for <strong>"Sick Leave/Medical Certificate (MC)"</strong> or <strong>"Unpaid Medical Certificate (MC-UPL)"</strong> will only be <strong>considered VALID and ELIGIBLE</strong> if a sick/medical certificate is <strong>issued by a REGISTERED government hospital/clinic or panel clinic only.
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -20,36 +26,37 @@
 
 	<!-- herecomes the hardest part, leave application -->
 
-	<div class="d-flex justify-content-center align-items-start">
+	<div class="col-sm-12 row">
 		{{ Form::open(['route' => ['leave.store'], 'id' => 'form', 'autocomplete' => 'off', 'files' => true,  'data-toggle' => 'validator']) }}
-		<h5>Leave Application</h5>
+		<h5 class="text-center">Leave Application</h5>
 
-		<div class="form-group row {{ $errors->has('leave_id') ? 'has-error' : '' }}">
-			{{ Form::label( 'leave_type_id', 'Leave Type : ', ['class' => 'col-sm-2 col-form-label'] ) }}
-			<div class="col-auto">
-				<select name="leave_type_id" id="leave_id" class="form-control col-auto"></select>
+		<div class="form-group row m-2 {{ $errors->has('leave_id') ? 'has-error' : '' }}">
+			{{ Form::label( 'leave_type_id', 'Leave Type : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+			<div class="col-sm-8">
+				<select name="leave_type_id" id="leave_id" class="form-control form-control-sm"></select>
 			</div>
 		</div>
 
-		<div class="form-group row mb-3 {{ $errors->has('reason') ? 'has-error' : '' }}">
-			{{ Form::label( 'reason', 'Reason : ', ['class' => 'col-sm-2 col-form-label'] ) }}
-			<div class="col-auto">
-				{{ Form::textarea('reason', @$value, ['class' => 'form-control col-auto', 'id' => 'reason', 'placeholder' => 'Reason', 'autocomplete' => 'off']) }}
+		<div class="form-group row m-2 {{ $errors->has('reason') ? 'has-error' : '' }}">
+			{{ Form::label( 'reason', 'Reason : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+			<div class="col-sm-8">
+				{{ Form::textarea('reason', @$value, ['class' => 'form-control form-control-sm ', 'id' => 'reason', 'placeholder' => 'Reason', 'autocomplete' => 'off']) }}
 			</div>
 		</div>
 
-		<div id="wrapper"></div>
+		<div class="m-2" id="wrapper">
+		</div>
 
-		<div class="form-group row mb-3 {{ $errors->has('akuan') ? 'has-error' : '' }}">
-			<div class="offset-sm-2 col-auto">
+		<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">
+			<div class="col-sm-8 offset-sm-4 form-check">
 				{{ Form::checkbox('akuan', 1, @$value, ['class' => 'form-check-input ', 'id' => 'akuan1']) }}
-					<label for="akuan1" class="form-check-label p-1 bg-warning text-danger rounded"><p>I hereby confirmed that all details and information filled in are <strong>CORRECT</strong> and <strong>CHECKED</strong> before sending.</p></label>
+				<label for="akuan1" class="form-check-label p-1 bg-warning text-danger rounded"><p>I hereby confirmed that all details and information filled in are <strong>CORRECT</strong> and <strong>CHECKED</strong> before sending.</p></label>
 			</div>
 		</div>
 
 		<div class="form-group row mb-3">
-			<div class="col-auto offset-sm-2">
-				{!! Form::button('Submit Application', ['class' => 'btn btn-sm btn-outline-secondary', 'type' => 'submit']) !!}
+			<div class="col-sm-8 offset-sm-4">
+				{!! Form::button('Submit Application', ['class' => 'btn btn-sm btn-primary', 'type' => 'submit']) !!}
 			</div>
 		</div>
 		{{ Form::close() }}
@@ -97,7 +104,7 @@ $('#leave_id').select2({
 // start setting up the leave accordingly.
 <?php
 $user = \Auth::user()->belongstostaff;
-$userneedbackup = $user->belongstoleaveapprovalflow->backup_approval;
+$userneedbackup = $user->belongstoleaveapprovalflow?->backup_approval;
 $setHalfDayMC = \App\Models\Setting::find(2)->active;
 // dd($setHalfDayMC);
 // checking for overlapped leave only for half day leave
@@ -106,6 +113,7 @@ $setHalfDayMC = \App\Models\Setting::find(2)->active;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  global variable : ajax to get the unavailable date
+
 var data2 = $.ajax({
 	url: "{{ route('leavedate.unavailabledate') }}",
 	type: "POST",
@@ -186,9 +194,9 @@ var data10 = $.ajax({
 // convert data10 into json
 var objtime = $.parseJSON( data10 );
 
-// console.log(objtime);
+console.log(objtime);
 
-//concept of checking overlapped half day leave
+// concept of checking overlapped half day leave
 // var d = false;
 // var itime_start = 0;
 // var itime_end = 0;
@@ -215,45 +223,45 @@ $('#leave_id').on('change', function() {
 		if($selection.val() == '3') {
 			$('#wrapper').append(
 				'<div id="remove">' +
-					<!-- annual leave -->
+					<!-- UNPAID LEAVE | UPL -->
 
-					'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-						'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto datetime" style="position: relative">' +
-							'{{ Form::text('date_time_start', @$value, ['class' => 'form-control col-auto', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+					'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+						'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 datetime" style="position: relative">' +
+							'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
 						'</div>' +
 					'</div>' +
 
-					'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-						'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto datetime" style="position: relative">' +
-							'{{ Form::text('date_time_end', @$value, ['class' => 'form-control col-auto', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+					'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+						'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 datetime" style="position: relative">' +
+							'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
 						'</div>' +
 					'</div>' +
 
-					'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-						'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+					'<div class="form-group row m-2 form-check {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+						'<div class="form-group col-sm-8 offset-sm-4 form-check {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 						'</div>' +
 					'</div>' +
 
 					@if( $userneedbackup == 1 )
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
+						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
 							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 					@endif
 
-					'<div class="form-group row mb-3 {{ $errors->has('document') ? 'has-error' : '' }}">' +
-						'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-						'<div class="col-auto supportdoc">' +
-							'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
+					'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+						'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+						'<div class="col-sm-8 supportdoc">' +
+							'{{ Form::file( 'document', ['class' => 'form-control form-control-sm form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 						'</div>' +
 					'</div>' +
 
-					'<div class="form-group row mb-3 {{ $errors->has('documentsupport') ? 'has-error' : '' }}">' +
-						'<div class="offset-sm-2 col-auto form-check suppdoc">' +
+					'<div class="form-group row m-2 {{ $errors->has('documentsupport') ? 'has-error' : '' }}">' +
+						'<div class="offset-sm-4 col-sm-8 form-check">' +
 							'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input ', 'id' => 'suppdoc']) }}' +
 							'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Documents</strong> within <strong>3 Days</strong> after date leave.</label>' +
 						'</div>' +
@@ -264,32 +272,31 @@ $('#leave_id').on('change', function() {
 		} else {
 			$('#wrapper').append(
 				'<div id="remove">' +
-					<!-- annual leave -->
-
-					'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-						'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto datetime" style="position: relative">' +
-							'{{ Form::text('date_time_start', @$value, ['class' => 'form-control col-auto', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+					<!-- ANNUAL LEAVE | AL -->
+					'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+						'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 datetime" style="position: relative">' +
+							'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
 						'</div>' +
 					'</div>' +
 
-					'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-						'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto datetime" style="position: relative">' +
-							'{{ Form::text('date_time_end', @$value, ['class' => 'form-control col-auto', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+					'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+						'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 datetime" style="position: relative">' +
+							'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
 						'</div>' +
 					'</div>' +
 
-					'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-						'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+					'<div class="form-group row m-2 form-check {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+						'<div class="form-group col-sm-8 offset-sm-4 form-check {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 						'</div>' +
 					'</div>' +
 
 					@if( $userneedbackup == 1 )
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
+						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 					@endif
@@ -360,118 +367,104 @@ $('#leave_id').on('change', function() {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+						// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -480,6 +473,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -506,118 +500,105 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#to').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					console.log(d, itime_start, itime_end);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						console.log(obj.time_start_am, itime_start);
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -626,7 +607,8 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
-		// end date
+		// end date to
+
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable radio
 		$(document).on('change', '#appendleavehalf :radio', function () {
@@ -660,17 +642,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
@@ -696,49 +674,49 @@ if(obj.time_start_pm == itime_start) {
 		$('#wrapper').append(
 			'<div id="remove">' +
 				<!-- mc leave -->
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
 				@if($setHalfDayMC == 1)
-				'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-2 form-check {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 form-check offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
 				@endif
 
-				@if( $userneedbackup == 1 )
+				@if( $userneedbackup == 99 ) <!-- mc got no backup -->
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+						'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm col-auto" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 				@endif
 
-				'<div class="form-group row mb-3 {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+				'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('documentsupport') ? 'has-error' : '' }}">' +
-					'<div class="offset-sm-2 col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input ', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Documents</strong> within <strong>3 Days</strong> after date leave.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('documentsupport') ? 'has-error' : '' }}">' +
+					'<div class="offset-sm-4 col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Documents</strong> within <strong>3 Days</strong> after date leave.</label>' +
 					'</div>' +
 				'</div>' +
 
@@ -746,7 +724,7 @@ if(obj.time_start_pm == itime_start) {
 		);
 
 		@if( $userneedbackup == 1 )
-		$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
+		// $('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
 		@endif
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_start"]'));
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_end"]'));
@@ -807,118 +785,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
 								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
 								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 form-check {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -928,6 +892,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 			@endif
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -957,118 +922,105 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
 							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
 								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
 								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf m-2">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -1078,7 +1030,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 			@endif
 		});
-		// end date
+		// end date to
 
 		@if($setHalfDayMC == 1)
 		/////////////////////////////////////////////////////////////////////////////////////////
@@ -1110,17 +1062,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
@@ -1149,11 +1097,11 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 		$('#remove').remove();
 		$('#wrapper').append(
 			'<div id="remove">' +
-				'<div class="form-group row mb-3 {{ $errors->has('leave_id') ? 'has-error' : '' }}">' +
-					'{{ Form::label('nrla', 'Please Choose Your Replacement Leave : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto nrl">' +
+				'<div class="form-group row m-2 {{ $errors->has('leave_id') ? 'has-error' : '' }}">' +
+					'{{ Form::label('nrla', 'Please Choose Your Replacement Leave : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 nrl">' +
 						'<p>Total Replacement Leave = {{ $oi->sum('leave_balance') }} days</p>' +
-						'<select name="id" id="nrla" class="form-control">' +
+						'<select name="id" id="nrla" class="form-control form-select form-select-sm">' +
 							'<option value="">Please select</option>' +
 						@foreach( $oi as $po )
 							'<option value="{{ $po->id }}" data-nrlbalance="{{ $po->leave_balance }}">On ' + moment( '{{ $po->date_start }}', 'YYYY-MM-DD' ).format('ddd Do MMM YYYY') + ', your leave balance = {{ $po->leave_balance }} day</option>' +
@@ -1162,30 +1110,30 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
 					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
 					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-2 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
 
 				@if( $userneedbackup == 1 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+						'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm col-auto" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
@@ -1265,118 +1213,104 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -1385,6 +1319,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -1411,118 +1346,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -1531,6 +1452,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
+		// end date to
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable radio
@@ -1561,17 +1483,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -1631,17 +1549,14 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -1662,24 +1577,24 @@ if(obj.time_start_pm == itime_start) {
 		$('#wrapper').append(
 			'<div id="remove">' +
 				<!-- maternity leave -->
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
-			@if( $userneedbackup == 1 )
-				'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-					'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto backup">' +
-						'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
+			@if( $userneedbackup == 99 )
+				'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
+					'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-2 col-form-label']) }}' +
+					'<div class="col-sm-6 backup">' +
+						'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm col-auto" placeholder="Please choose" autocomplete="off"></select>' +
 					'</div>' +
 				'</div>' +
 			@endif
@@ -1693,7 +1608,7 @@ if(obj.time_start_pm == itime_start) {
 		// more option
 		$('#form').bootstrapValidator('addField', $('.nrl').find('[name="leave_id"]'));
 		@if( $userneedbackup == 1 )
-		$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
+		// $('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
 		@endif
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_start"]'));
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_end"]'));
@@ -1786,51 +1701,42 @@ if(obj.time_start_pm == itime_start) {
 			'<div id="remove">' +
 				<!-- emergency leave -->
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 col-auto {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-					'<div class="col-auto removehalfleave" id="halfleave">' +
-					'</div>' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-2 col-auto {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
 
 				@if( $userneedbackup == 1 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
-						'</div>' +
-					'</div>' +
 				'</div>' +
 				@endif
 
-				'<div class="form-group row {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+				'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
-					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input rounded', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
+					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
 					'</div>' +
 				'</div>' +
 			'</div>'
@@ -1840,7 +1746,7 @@ if(obj.time_start_pm == itime_start) {
 		// more option
 		$('#form').bootstrapValidator('addField', $('.nrl').find('[name="leave_id"]'));
 		@if( $userneedbackup == 1 )
-		$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
+			$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
 		@endif
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_start"]'));
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_end"]'));
@@ -1848,30 +1754,6 @@ if(obj.time_start_pm == itime_start) {
 		$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 		$('#form').bootstrapValidator('addField', $('.supportdoc').find('[name="document"]'));
 		$('#form').bootstrapValidator('addField', $('.suppdoc').find('[name="documentsupport"]'));
-
-		/////////////////////////////////////////////////////////////////////////////////////////
-		//enable select 2 for backup
-		$('#backupperson').select2({
-			placeholder: 'Please Choose',
-			width: '100%',
-			ajax: {
-				url: '{{ route('backupperson') }}',
-				// data: { '_token': '{!! csrf_token() !!}' },
-				type: 'POST',
-				dataType: 'json',
-				data: function (params) {
-					var query = {
-						id: {{ \Auth::user()->belongstostaff->id }},
-						_token: '{!! csrf_token() !!}',
-						date_from: $('#from').val(),
-						date_to: $('#to').val(),
-					}
-					return query;
-				}
-			},
-			allowClear: true,
-			closeOnSelect: true,
-		});
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable datetime for the 1st one
@@ -1901,118 +1783,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+								'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+								'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+										'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
 										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+										'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
 										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
 								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
+
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
+
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
+
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
+
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
-
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
-
-// convert data1 into json
-var obj = $.parseJSON( data1 );
-
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
-
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -2029,10 +1897,10 @@ if(obj.time_start_pm == itime_start) {
 				// console.log($( '#rembackup').children().length + ' <= rembackup length' );
 				if( $('#backupwrapper').children().length == 0 ) {
 					$('#backupwrapper').append(
-						'<div class="form-group row {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-							'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-							'<div class="col-auto backup">' +
-								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
+						'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+							'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
+								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm col-auto" placeholder="Please choose" autocomplete="off"></select>' +
 							'</div>' +
 						'</div>'
 					);
@@ -2058,6 +1926,8 @@ if(obj.time_start_pm == itime_start) {
 						allowClear: true,
 						closeOnSelect: true,
 					});
+				} else {
+					$('#backupremove').remove();
 				}
 			} else {
 				$('#form').bootstrapValidator('removeField', $('.backup').find('[name="staff_id"]'));
@@ -2065,6 +1935,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 			@endif
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -2092,118 +1963,105 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" disabled="disabled">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -2211,7 +2069,56 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_start"]'));
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
+
+			// check for user backup
+			@if( $userneedbackup == 1 )
+			// enable backup if date from is greater or equal than today.
+			// cari date now dulu
+			if( $('#from').val() >= moment().format('YYYY-MM-DD') ) {
+				// console.log( moment().add(1, 'days').format('YYYY-MM-DD') );
+				// console.log($( '#rembackup').children().length + ' <= rembackup length' );
+				if( $('#backupwrapper').children().length == 0 ) {
+					$('#backupwrapper').append(
+						'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+							'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
+								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm col-auto" placeholder="Please choose" autocomplete="off"></select>' +
+							'</div>' +
+						'</div>'
+					);
+					$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
+					$('#backupperson').select2({
+						placeholder: 'Please Choose',
+						width: '100%',
+						ajax: {
+							url: '{{ route('backupperson') }}',
+							// data: { '_token': '{!! csrf_token() !!}' },
+							type: 'POST',
+							dataType: 'json',
+							data: function (params) {
+								var query = {
+									id: {{ \Auth::user()->belongstostaff->id }},
+									_token: '{!! csrf_token() !!}',
+									date_from: $('#from').val(),
+									date_to: $('#to').val(),
+								}
+								return query;
+							}
+						},
+						allowClear: true,
+						closeOnSelect: true,
+					});
+				}
+				// else {
+				// 	$('#backupremove').remove();
+				// }
+			} else {
+				$('#form').bootstrapValidator('removeField', $('.backup').find('[name="staff_id"]'));
+				$('#backupwrapper').children().remove();
+			}
+			@endif
 		});
+		// end date to
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable radio
@@ -2242,17 +2149,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -2274,48 +2177,48 @@ if(obj.time_start_pm == itime_start) {
 		$('#wrapper').append(
 			'<div id="remove">' +
 				<!-- time off -->
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'Date : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'Date : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'Date : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'Date', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'Time : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto">' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'Time : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8">' +
 							'<div class="form-row time">' +
-								'<div class="col-auto mb-3" style="position: relative">' +
-									'{{ Form::text('time_start', @$value, ['class' => 'form-control', 'id' => 'start', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+								'<div class="col-sm-8 m-2" style="position: relative">' +
+									'{{ Form::text('time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'start', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 								'</div>' +
-								'<div class="col-auto mb-3" style="position: relative">' +
-									'{{ Form::text('time_end', @$value, ['class' => 'form-control', 'id' => 'end', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+								'<div class="col-sm-8 m-2" style="position: relative">' +
+									'{{ Form::text('time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'end', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 								'</div>' +
 							'</div>' +
 					'</div>' +
 				'</div>' +
 				@if( $userneedbackup == 1 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 				@endif
-				'<div class="form-group row mb-3 {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+				'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
-					'{{ Form::label('suppdoc', 'Supporting Documents : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input rounded', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
+					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of <strong>3 Days</strong> upon return.</label>' +
 					'</div>' +
 				'</div>' +
 
@@ -2348,7 +2251,7 @@ if(obj.time_start_pm == itime_start) {
 						id: {{ \Auth::user()->belongstostaff->id }},
 						_token: '{!! csrf_token() !!}',
 						date_from: $('#from').val(),
-						date_to: $('#to').val(),
+						date_to: $('#from').val(),
 					}
 					return query;
 				}
@@ -2373,7 +2276,7 @@ if(obj.time_start_pm == itime_start) {
 			},
 			format:'YYYY-MM-DD',
 			useCurrent: false,
-			disabledDates:data,
+			disabledDates:data4,
 			// minDate: moment().format('YYYY-MM-DD'),
 			// daysOfWeekDisabled: [0],
 		})
@@ -2389,8 +2292,8 @@ if(obj.time_start_pm == itime_start) {
 				if( $('#backupwrapper').children().length == 0 ) {
 					$('#backupwrapper').append(
 						'<div class="form-group row {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-							'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-							'<div class="col-auto backup">' +
+							'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
 								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 							'</div>' +
 						'</div>'
@@ -2428,11 +2331,11 @@ if(obj.time_start_pm == itime_start) {
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// time start
 		// need to get working hour for each user
-// lazy to implement this 1. :P
-// moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a')
-// moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a')
-// moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a')
-// moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a')
+		// lazy to implement this 1. :P
+		// moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a')
+		// moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a')
+		// moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a')
+		// moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a')
 
 		$('#start').datetimepicker({
 			icons: {
@@ -2447,7 +2350,7 @@ if(obj.time_start_pm == itime_start) {
 				close: 'fas fas-regular fa-rectangle-xmark fa-beat'
 			},
 			format: 'h:mm A',
-			enabledHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+			// enabledHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
 		})
 		.on('dp.change dp.update', function(e){
 			$('#form').bootstrapValidator('revalidateField', 'time_start');
@@ -2467,7 +2370,7 @@ if(obj.time_start_pm == itime_start) {
 				close: 'fas fas-regular fa-rectangle-xmark fa-beat'
 			},
 			format: 'h:mm A',
-			enabledHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+			// enabledHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
 		})
 		.on('dp.change dp.update', function(e){
 			$('#form').bootstrapValidator('revalidateField', 'time_end');
@@ -2482,50 +2385,50 @@ if(obj.time_start_pm == itime_start) {
 		$('#wrapper').append(
 			'<div id="remove">' +
 				<!-- mc leave -->
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
 				@if($setHalfDayMC == 1)
-				'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-2 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
 				@endif
 
-				@if( $userneedbackup == 1 )
+				@if( $userneedbackup == 99 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 				@endif
 
-				'<div class="form-group row mb-3 {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+				'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
-					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input rounded', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
+					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
 					'</div>' +
 				'</div>' +
 
@@ -2571,118 +2474,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+								'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+								'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+										'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" disabled="disabled">' +
 										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+										'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" checked="checked">' +
 										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
 								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
+
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
+
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
+
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
+
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
-
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
-
-// convert data1 into json
-var obj = $.parseJSON( data1 );
-
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
-
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			@endif
@@ -2693,7 +2582,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 
 			// for backup person based on from date
-			@if( $userneedbackup == 1 )
+			@if( $userneedbackup == 99 )
 			// enable backup if date from is greater or equal than today.
 			//cari date now dulu
 			if( $('#from').val() >= moment().format('YYYY-MM-DD') ) {
@@ -2702,8 +2591,8 @@ if(obj.time_start_pm == itime_start) {
 				if( $('#backupwrapper').children().length == 0 ) {
 					$('#backupwrapper').append(
 						'<div class="form-group row {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-							'{{ Form::label('backupperson', 'Replacement : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-							'<div class="col-auto backup">' +
+							'{{ Form::label('backupperson', 'Backup : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
 								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 							'</div>' +
 						'</div>'
@@ -2765,118 +2654,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+								'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+								'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+										'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
 										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+										'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
 										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
 								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
+
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
+
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
+
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
+
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
-
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
-
-// convert data1 into json
-var obj = $.parseJSON( data1 );
-
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
-
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
+					} else {
+						$('#wrapperday').append(
 							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
 							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			@endif
@@ -2890,7 +2765,7 @@ if(obj.time_start_pm == itime_start) {
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//enable select 2 for backup
-		@if( $userneedbackup == 1 )
+		@if( $userneedbackup == 99 )
 		$('#backupperson').select2({
 			placeholder: 'Please Choose',
 			width: '100%',
@@ -2943,17 +2818,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -2979,11 +2850,11 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 		$('#remove').remove();
 		$('#wrapper').append(
 			'<div id="remove">' +
-				'<div class="form-group row mb-3 {{ $errors->has('leave_id') ? 'has-error' : '' }}">' +
-					'{{ Form::label('nrla', 'Please Choose Your Replacement Leave : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto nrl">' +
+				'<div class="form-group row m-2 {{ $errors->has('leave_id') ? 'has-error' : '' }}">' +
+					'{{ Form::label('nrla', 'Please Choose Your Replacement Leave : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 nrl">' +
 						'<p>Total Replacement Leave = {{ $oi->sum('leave_balance') }} days</p>' +
-						'<select name="id" id="nrla" class="form-control">' +
+						'<select name="id" id="nrla" class="form-control form-select form-select-sm">' +
 							'<option value="">Please select</option>' +
 						@foreach( $oi as $po )
 							'<option value="{{ $po->id }}" data-nrlbalance="{{ $po->leave_balance }}">On ' + moment( '{{ $po->date_start }}', 'YYYY-MM-DD' ).format('ddd Do MMM YYYY') + ', your leave balance = {{ $po->leave_balance }} day</option>' +
@@ -2992,46 +2863,46 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
-					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
+					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-2 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
-				@if( $userneedbackup == 1 )
+				@if( $userneedbackup == 99 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
-						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}" id="backupremove">' +
+						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 				@endif
 
-				'<div class="form-group row {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+				'<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
-					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input rounded', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
+					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
 					'</div>' +
 				'</div>' +
 			'</div>'
@@ -3041,7 +2912,7 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 		// more option
 		$('#form').bootstrapValidator('addField', $('.nrl').find('[name="leave_id"]'));
 		@if( $userneedbackup == 1 )
-		$('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
+		// $('#form').bootstrapValidator('addField', $('.backup').find('[name="staff_id"]'));
 		@endif
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_start"]'));
 		$('#form').bootstrapValidator('addField', $('.datetime').find('[name="date_time_end"]'));
@@ -3052,7 +2923,9 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable select2
-		$('#nrla').select2({ placeholder: 'Please select', 	width: '100%',
+		$('#nrla').select2({
+			placeholder: 'Please select',
+			width: '100%',
 		});
 
 		/////////////////////////////////////////////////////////////////////////////////////////
@@ -3108,118 +2981,104 @@ $oi = \Auth::user()->belongstostaff->hasmanyleavereplacement()->where('leave_bal
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+								'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+								'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+										'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" disabled="disabled">' +
 										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+										'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" checked="checked">' +
 										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 									'</div>' +
 								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
+
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
+
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
+
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
+
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>' +
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
-
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
-
-// convert data1 into json
-var obj = $.parseJSON( data1 );
-
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
-
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave m-2" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave m-2" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -3228,7 +3087,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 
-			@if( $userneedbackup == 1 )
+			@if( $userneedbackup == 99 )
 			// enable backup if date from is greater or equal than today.
 			//cari date now dulu
 			if( $('#from').val() >= moment().format('YYYY-MM-DD') ) {
@@ -3237,8 +3096,8 @@ if(obj.time_start_pm == itime_start) {
 				if( $('#backupwrapper').children().length == 0 ) {
 					$('#backupwrapper').append(
 						'<div class="form-group row {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-							'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-							'<div class="col-auto backup">' +
+							'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
 								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 							'</div>' +
 						'</div>'
@@ -3272,6 +3131,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 			@endif
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -3299,118 +3159,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+									'<input type="radio" name="leave_cat" value="1" id="radio1" class="m-2 removehalfleave" checked="checked">' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+									'<input type="radio" name="leave_cat" value="2" id="radio2" class="m-2 removehalfleave" >' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
+								'</div>' +
+							'</div>' +
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -3419,7 +3265,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
-		// end date
+		// end date to
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable radio
@@ -3450,17 +3296,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -3520,17 +3362,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}
@@ -3544,7 +3382,7 @@ if(obj.time_start_pm == itime_start) {
 	}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// annual leave & UPL
+	// S-UPL
 	if ($selection.val() == '12') {
 
 		$('#remove').remove();
@@ -3553,48 +3391,48 @@ if(obj.time_start_pm == itime_start) {
 			'<div id="remove">' +
 				<!-- annual leave -->
 
-				'<div class="form-group row mb-3 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
-					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control col-auto', 'id' => 'from', 'placeholder' => 'From : ', 'autocomplete' => 'off']) }}' +
+				'<div class="form-group row m-2 {{ $errors->has('date_time_start') ? 'has-error' : '' }}">' +
+					'{{ Form::label('from', 'From : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_start', @$value, ['class' => 'form-control form-control-sm', 'id' => 'from', 'placeholder' => 'From', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
 				'<div class="form-group row mb-3 {{ $errors->has('date_time_end') ? 'has-error' : '' }}">' +
 					'{{ Form::label('to', 'To : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto datetime" style="position: relative">' +
-						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control col-auto', 'id' => 'to', 'placeholder' => 'To : ', 'autocomplete' => 'off']) }}' +
+					'<div class="col-sm-8 datetime" style="position: relative">' +
+						'{{ Form::text('date_time_end', @$value, ['class' => 'form-control form-control-sm', 'id' => 'to', 'placeholder' => 'To', 'autocomplete' => 'off']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row mb-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
-					'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+				'<div class="form-group row m-3 {{ $errors->has('leave_cat') ? 'has-error' : '' }}" id="wrapperday">' +
+					'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 					'</div>' +
 				'</div>' +
 
-				@if( $userneedbackup == 1 )
+				@if( $userneedbackup == 99 )
 				'<div id="backupwrapper">' +
-					'<div class="form-group row mb-3 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-						'<div class="col-auto backup">' +
-							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm " placeholder="Please choose" autocomplete="off"></select>' +
+					'<div class="form-group row m-2 {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
+						'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+						'<div class="col-sm-8 backup">' +
+							'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 				@endif
 
 				'<div class="form-group row {{ $errors->has('document') ? 'has-error' : '' }}">' +
-					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-2 col-form-label'] ) }}' +
-					'<div class="col-auto supportdoc">' +
+					'{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}' +
+					'<div class="col-sm-8 supportdoc">' +
 						'{{ Form::file( 'document', ['class' => 'form-control form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}' +
 					'</div>' +
 				'</div>' +
 
-				'<div class="form-group row {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
-					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-					'<div class="col-auto form-check suppdoc">' +
-						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input rounded', 'id' => 'suppdoc']) }}' +
-						'<label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
+				'<div class="form-group row m-2 {{ $errors->has('akuan') ? 'has-error' : '' }}">' +
+					'{{ Form::label('suppdoc', 'Supporting Document : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+					'<div class="col-sm-8 suppdoc form-check">' +
+						'{{ Form::checkbox('documentsupport', 1, @$value, ['class' => 'form-check-input', 'id' => 'suppdoc']) }}' +
+						' <label for="suppdoc" class="form-check-label p-1 bg-warning text-danger rounded">Please ensure you will submit <strong>Supporting Document</strong> within a period of  <strong>3 Days</strong> upon return.</label>' +
 					'</div>' +
 				'</div>' +
 
@@ -3666,118 +3504,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+							'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					} else {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -3786,7 +3610,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 
-			@if( $userneedbackup == 1 )
+			@if( $userneedbackup == 99 )
 			// enable backup if date from is greater or equal than today.
 			//cari date now dulu
 			if( $('#from').val() >= moment().format('YYYY-MM-DD') ) {
@@ -3795,8 +3619,8 @@ if(obj.time_start_pm == itime_start) {
 				if( $('#backupwrapper').children().length == 0 ) {
 					$('#backupwrapper').append(
 						'<div class="form-group row {{ $errors->has('staff_id') ? 'has-error' : '' }}">' +
-							'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-2 col-form-label']) }}' +
-							'<div class="col-auto backup">' +
+							'{{ Form::label('backupperson', 'Backup Person : ', ['class' => 'col-sm-4 col-form-label']) }}' +
+							'<div class="col-sm-8 backup">' +
 								'<select name="staff_id" id="backupperson" class="form-control form-select form-select-sm" placeholder="Please choose" autocomplete="off"></select>' +
 							'</div>' +
 						'</div>'
@@ -3830,6 +3654,7 @@ if(obj.time_start_pm == itime_start) {
 			}
 			@endif
 		});
+		// end date from
 
 		$('#to').datetimepicker({
 			icons: {
@@ -3857,118 +3682,104 @@ if(obj.time_start_pm == itime_start) {
 			if($('#from').val() === $('#to').val()) {
 				if( $('.removehalfleave').length === 0) {
 
-////////////////////////////////////////////////////////////////////////////////////////
-// checking half day leave
-var d = false;
-var itime_start = 0;
-var itime_end = 0;
-$.each(objtime, function() {
-// console.log(this.date_half_leave);
-	if(this.date_half_leave == $('#from').val()) {
-		return [d = true, itime_start = this.time_start, itime_end = this.time_end];
-	}
-});
-// console.log(d);
-if(d === true) {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+					////////////////////////////////////////////////////////////////////////////////////////
+					// checking half day leave
+					var d = false;
+					var itime_start = 0;
+					var itime_end = 0;
+					$.each(objtime, function() {
+					// console.log(this.date_half_leave);
+						if(this.date_half_leave == $('#from').val()) {
+							return [d = true, itime_start = this.time_start, itime_end = this.time_end];
+						}
+					});
+					// console.log(d);
+					if(d === true) {
+						$('#wrapperday').append(
+							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+							'<div class="col-sm-6 m-2 removehalfleave " id="halfleave">' +
+								'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
 									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" disabled="disabled">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+								'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
 									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
+									'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
 								'</div>' +
 							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
 
-var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
-var datenow =$('#from').val();
+						var daynow = moment($('#from').val(), 'YYYY-MM-DD').format('dddd');
+						var datenow =$('#from').val();
 
-var data1 = $.ajax({
-	url: "{{ route('leavedate.timeleave') }}",
-	type: "POST",
-	data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
-	dataType: 'json',
-	global: false,
-	async:false,
-	success: function (response) {
-		// you will get response from your php page (what you echo or print)
-		return response;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log(textStatus, errorThrown);
-	}
-}).responseText;
+						var data1 = $.ajax({
+							url: "{{ route('leavedate.timeleave') }}",
+							type: "POST",
+							data: {date: datenow, _token: '{!! csrf_token() !!}', id: {{ \Auth::user()->belongstostaff->id }} },
+							dataType: 'json',
+							global: false,
+							async:false,
+							success: function (response) {
+								// you will get response from your php page (what you echo or print)
+								return response;
+							},
+							error: function(jqXHR, textStatus, errorThrown) {
+								console.log(textStatus, errorThrown);
+							}
+						}).responseText;
 
-// convert data1 into json
-var obj = $.parseJSON( data1 );
+						// convert data1 into json
+						var obj = $.parseJSON( data1 );
 
-var checkedam = 'checked';
-var checkedpm = 'checked';
-if(obj.time_start_am == itime_start) {
-	var toggle_time_start_am = 'disabled';
-	var checkedam = '';
-	var checkedpm = 'checked';
-}
+						var checkedam = 'checked';
+						var checkedpm = 'checked';
+						if(obj.time_start_am == itime_start) {
+							var toggle_time_start_am = 'disabled';
+							var checkedam = '';
+							var checkedpm = 'checked';
+						}
 
-if(obj.time_start_pm == itime_start) {
-	var toggle_time_start_pm = 'disabled';
-	var checkedam = 'checked';
-	var checkedpm = '';
-}
-					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
+						if(obj.time_start_pm == itime_start) {
+							var toggle_time_start_pm = 'disabled';
+							var checkedam = 'checked';
+							var checkedpm = '';
+						}
+						$('#wrappertest').append(
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" ' + toggle_time_start_am + ' ' + checkedam + '>' +
+								'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>' +
-						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
-							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
-						'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-
-} else {
-					$('#wrapperday').append(
-							'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-2 col-form-label removehalfleave']) }}' +
-							'<div class="col-auto mb-3 removehalfleave " id="halfleave">' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="removeleavehalf">' +
-									'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-								'<div class="pretty p-default p-curve form-check form-check-inline removehalfleave" id="appendleavehalf">' +
-									'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
-									'<div class="state p-success removehalfleave">' +
-										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave']) }}' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-							'<div class="form-group col-auto offset-sm-2 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
-
+							'<div class="form-check form-check-inline removetest">' +
+								'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm" ' + toggle_time_start_pm + ' ' + checkedpm + '>' +
+								'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 							'</div>'
-					);
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
-					$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
-}
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+
+					} else {
+						$('#wrapperday').append(
+								'{{ Form::label('leave_cat', 'Leave Category : ', ['class' => 'col-sm-4 col-form-label removehalfleave']) }}' +
+								'<div class="col-sm-8 m-2 removehalfleave " id="halfleave">' +
+									'<div class="form-check form-check-inline removehalfleave" id="removeleavehalf">' +
+										'<input type="radio" name="leave_cat" value="1" id="radio1" class="removehalfleave" checked="checked">' +
+										'{{ Form::label('radio1', 'Full Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+									'</div>' +
+									'<div class="form-check form-check-inline removehalfleave" id="appendleavehalf">' +
+										'<input type="radio" name="leave_cat" value="2" id="radio2" class="removehalfleave" >' +
+										'{{ Form::label('radio2', 'Half Day Off', ['class' => 'form-check-label removehalfleave m-2']) }}' +
+									'</div>' +
+								'</div>' +
+								'<div class="form-group col-sm-8 offset-sm-4 {{ $errors->has('half_type_id') ? 'has-error' : '' }} removehalfleave"  id="wrappertest">' +
+								'</div>'
+						);
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_start"]'));
+						$('#form').bootstrapValidator('addField', $('.time').find('[name="time_end"]'));
+					}
 				}
 			}
 			if($('#from').val() !== $('#to').val()) {
@@ -3977,7 +3788,7 @@ if(obj.time_start_pm == itime_start) {
 				$('#form').bootstrapValidator('removeField', $('.time').find('[name="time_end"]'));
 			}
 		});
-		// end date
+		// end date to
 
 		/////////////////////////////////////////////////////////////////////////////////////////
 		// enable radio
@@ -4008,17 +3819,13 @@ if(obj.time_start_pm == itime_start) {
 				// checking so there is no double
 				if( $('.removetest').length == 0 ) {
 					$('#wrappertest').append(
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="1/' + obj.time_start_am + '/' + obj.time_end_am + '" id="am" checked="checked">' +
-							'<div class="state p-primary">' +
-								'<label for="am" class="form-check-label">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="am" class="form-check-label m-2">' + moment(obj.time_start_am, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_am, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>' +
-						'<div class="pretty p-default p-curve form-check form-check-inline removetest">' +
+						'<div class="form-check form-check-inline removetest">' +
 							'<input type="radio" name="half_type_id" value="2/' + obj.time_start_pm + '/' + obj.time_end_pm + '" id="pm">' +
-							'<div class="state p-primary">' +
-								'<label for="pm" class="form-check-label">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
-							'</div>' +
+							'<label for="pm" class="form-check-label m-2">' + moment(obj.time_start_pm, 'HH:mm:ss').format('h:mm a') + ' to ' + moment(obj.time_end_pm, 'HH:mm:ss').format('h:mm a') + '</label> ' +
 						'</div>'
 					);
 				}

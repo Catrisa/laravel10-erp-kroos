@@ -59,15 +59,28 @@ $paleave = HRLeave::where(function (Builder $query) {
 			->orderBy('date_time_end', 'DESC')
 			->get();
 			// ->ddRawSql();
+
+
+
+// who am i?
+$me1 = \Auth::user()->belongstostaff->div_id == 1;		// hod
+$me2 = \Auth::user()->belongstostaff->div_id == 5;		// hod assistant
+$me3 = \Auth::user()->belongstostaff->div_id == 4;		// supervisor
+$me4 = \Auth::user()->belongstostaff->div_id == 3;		// HR
+$me5 = \Auth::user()->belongstostaff->authorise_id == 1;	// admin
+$me6 = \Auth::user()->belongstostaff->div_id == 2;		// director
+$dept = \Auth::user()->belongstostaff->belongstomanydepartment()->wherePivot('main', 1)->first();
+$deptid = $dept->id;
+$branch = $dept->branch_id;
+$category = $dept->category_id;
 ?>
-
-
-<div class="col-sm-12 row">
+<div class="container row align-items-start justify-content-center">
 @include('humanresources.hrdept.navhr')
 	<h4>Leaves</h4>
 	<p>&nbsp;</p>
 	<h5>Upcoming Leaves</h5>
 	@if($upleave)
+	<div class="col-sm-12 table-responsive">
 		<table id="upleave" class="table table-sm table-hover" style="font-size:12px;">
 			<thead>
 				<tr>
@@ -81,8 +94,11 @@ $paleave = HRLeave::where(function (Builder $query) {
 					<th>Duration</th>
 					<th>Reason</th>
 					<th>Status</th>
+					<th>Supp Doc</th>
 					<th>Remarks</th>
-					<th>Remarks HR</th>
+					@if((($me1 || $me2) && $deptid == 14) || $me5)
+						<th>Remarks HR</th>
+					@endif
 				</tr>
 			</thead>
 			<tbody>
@@ -108,30 +124,120 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 	$dte = \Carbon\Carbon::parse($ul->date_time_end)->format('j M Y ');
 	$dper = $ul->period_day.' day/s';
 }
+
+if ($me1) {																				// hod
+	if ($deptid == 21 || $deptid == 28) {																// hod | dept prod A | dept prod B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+	} elseif($deptid == 14) {															// hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 3;
+	} elseif ($deptid == 23) {															// hod | not dept prod A | not dept prod B | not HR | not cust serv | puchasing
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 16 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 17;
+	} else {																			// hod | not dept prod A | not dept prod B | not HR | not cust serv | not puchasing | other dept
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid;
+	}
+} elseif($me2) {																		// not hod | asst hod
+	if($deptid == 14) {																	// not hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// not hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 3;
+	}
+} elseif($me3) {																		// not hod | not asst hod | supervisor
+	if($branch == 1) {																	// not hod | not asst hod | supervisor | branch A
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	} elseif ($branch == 2) {															// not hod | not asst hod | supervisor | not branch A | branch B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	}
+} elseif($me6) {																		// not hod | not asst hod | not supervisor | director
+	$ha = true;
+} elseif($me5) {																		// not hod | not asst hod | not supervisor | not director | admin
+	$ha = true;
+} else {
+	$ha = false;
+}
 ?>
-					<tr>
-						<td><a href="{{ route('staff.show', $ul->belongstostaff->id) }}">{{ $ul->belongstostaff->hasmanylogin()->where('active', 1)->first()->username }}</a></td>
-						<td>{{ $ul->belongstostaff->name }}</td>
-						<td><a href="{{ route('hrleave.show', $ul->id) }}">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
-						<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
-						<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
-						<td>{{ $dts }}</td>
-						<td>{{ $dte }}</td>
-						<td>{{ $dper }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">{{ Str::limit($ul->reason, 10, ' >') }}</td>
-						<td>
-							@if(is_null($ul->leave_status_id))
-								Pending
-							@else
-								{{ $ul->belongstooptleavestatus?->status }}
+					@if( $ha )
+						<tr>
+							<td><a href="{{ route('staff.show', $ul->staff_id) }}" target="_blank">{{ App\Models\Login::where([['staff_id', $ul->staff_id], ['active', 1]])->first()->username ?? NULL }}</a></td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->belongstostaff?->name }}">
+								{{ Str::words($ul->belongstostaff?->name, 3, ' >') }}
+							</td>
+							<td><a href="{{ route('hrleave.show', $ul->id) }}" target="_blank">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
+							<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
+							<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
+							<td>{{ $dts }}</td>
+							<td>{{ $dte }}</td>
+							<td>{{ $dper }}</td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">
+								{{ Str::limit($ul->reason, 10, ' >') }}
+							</td>
+							<td>
+								@if(is_null($ul->leave_status_id))
+									Pending
+								@else
+									{{ $ul->belongstooptleavestatus?->status }}
+								@endif
+							</td>
+							<td>
+								@if($ul->softcopy)
+									<a href="{{ asset('storage/leaves/'.$ul->softcopy) }}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="bi bi-file-richtext"></i></a>
+								@else
+									<!-- Button trigger modal -->
+									<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploaddoc_{{ $ul->id }}">
+										<i class="fa-solid fa-upload"></i>
+									</button>
+
+									<!-- Modal -->
+									<div class="modal fade" id="uploaddoc_{{ $ul->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploaddocLabel_{{ $ul->id }}" aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												{{ Form::open(['route' => ['uploaddoc', $ul->id], 'method' => 'patch', 'id' => 'form', 'autocomplete' => 'off', 'files' => true,  'data-toggle' => 'validator']) }}
+												<div class="modal-header">
+													<h1 class="modal-title fs-5" id="uploaddocLabel_{{ $ul->id }}">Upload Supporting Document</h1>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body text-center">
+
+													<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">
+														{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::file( 'document', ['class' => 'form-control form-control-sm form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}
+														</div>
+													</div>
+
+													<div class="form-group row m-2 {{ $errors->has('amend_note') ? 'has-error' : '' }}">
+														{{ Form::label( 'rem', 'Remarks : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::textarea( 'amend_note', @$value, ['class' => 'form-control form-control-sm', 'id' => 'rem', 'placeholder' => 'Remarks']) }}
+														</div>
+													</div>
+
+												</div>
+												<div class="modal-footer">
+														<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+														{{ Form::submit('Submit', ['class' => 'btn btn-sm btn-outline-secondary']) }}
+												</div>
+												{{ Form::close() }}
+											</div>
+										</div>
+									</div>
+								@endif
+							</td>
+							<td {!! ($ul->remarks)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.$ul->remarks.'"':NULL !!}>
+								{{ Str::limit($ul->remarks, 10, ' >') }}
+							</td>
+							@if((($me1 || $me2) && $deptid == 14) || $me5)
+							<td {!! ($ul->hasmanyleaveamend()?->first()?->amend_note)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.$ul->hasmanyleaveamend()?->first()?->amend_note.'"':NULL !!}>
+								{{ Str::limit($ul->hasmanyleaveamend()?->first()?->amend_note, 10, ' >') }}
+							</td>
 							@endif
-						</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->remarks)??' ' }}">{{ Str::limit($ul->remarks, 10, ' >') }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->hasmanyleaveamend()->first()?->amend_note)??' ' }}">{{ Str::limit($ul->hasmanyleaveamend()->first()?->amend_note, 10, ' >') }}</td>
-					</tr>
+						</tr>
+					@endif
 				@endforeach
 			</tbody>
 		</table>
+	</div>
 	@else
 	<p>No Upcoming Leave</p>
 	@endif
@@ -139,6 +245,7 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 	<p>&nbsp;</p>
 	<h5>Current Leaves</h5>
 	@if($toleave)
+	<div class="col-sm-12 table-responsive">
 		<table id="toleave" class="table table-sm table-hover" style="font-size:12px;">
 			<thead>
 				<tr>
@@ -152,8 +259,11 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 					<th>Duration</th>
 					<th>Reason</th>
 					<th>Status</th>
+					<th>Supp Doc</th>
 					<th>Remarks</th>
+					@if((($me1 || $me2) && $deptid == 14) || $me5)
 					<th>Remarks HR</th>
+					@endif
 				</tr>
 			</thead>
 			<tbody>
@@ -179,30 +289,120 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 	$dte = \Carbon\Carbon::parse($ul->date_time_end)->format('j M Y ');
 	$dper = $ul->period_day.' day/s';
 }
+
+if ($me1) {																				// hod
+	if ($deptid == 21) {																// hod | dept prod A
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+	} elseif($deptid == 28) {															// hod | not dept prod A | dept prod B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+	} elseif($deptid == 14) {															// hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 3;
+	} elseif ($deptid == 23) {															// hod | not dept prod A | not dept prod B | not HR | not cust serv | puchasing
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 16 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 17;
+	} else {																			// hod | not dept prod A | not dept prod B | not HR | not cust serv | not puchasing | other dept
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid;
+	}
+} elseif($me2) {																		// not hod | asst hod
+	if($deptid == 14) {																	// not hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// not hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7;
+	}
+} elseif($me3) {																		// not hod | not asst hod | supervisor
+	if($branch == 1) {																	// not hod | not asst hod | supervisor | branch A
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	} elseif ($branch == 2) {															// not hod | not asst hod | supervisor | not branch A | branch B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	}
+} elseif($me6) {																		// not hod | not asst hod | not supervisor | director
+	$ha = true;
+} elseif($me5) {																		// not hod | not asst hod | not supervisor | not director | admin
+	$ha = true;
+} else {
+	$ha = false;
+}
 ?>
-					<tr>
-						<td><a href="{{ route('staff.show', $ul->belongstostaff->id) }}">{{ $ul->belongstostaff->hasmanylogin()->where('active', 1)->first()->username }}</a></td>
-						<td>{{ $ul->belongstostaff->name }}</td>
-						<td><a href="{{ route('hrleave.show', $ul->id) }}">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
-						<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
-						<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
-						<td>{{ $dts }}</td>
-						<td>{{ $dte }}</td>
-						<td>{{ $dper }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">{{ Str::limit($ul->reason, 10, ' >') }}</td>
-						<td>
-							@if(is_null($ul->leave_status_id))
-								Pending
-							@else
-								{{ $ul->belongstooptleavestatus?->status }}
+					@if( $ha )
+						<tr>
+							<td><a href="{{ route('staff.show', $ul->staff_id) }}" target="_blank">{{ App\Models\Login::where([['staff_id', $ul->staff_id], ['active', 1]])->first()->username ?? NULL }}</a></td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->belongstostaff?->name }}">
+								{{ Str::words($ul->belongstostaff?->name, 3, ' >') }}
+							</td>
+							<td><a href="{{ route('hrleave.show', $ul->id) }}" target="_blank">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
+							<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
+							<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
+							<td>{{ $dts }}</td>
+							<td>{{ $dte }}</td>
+							<td>{{ $dper }}</td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">{{ Str::limit($ul->reason, 10, ' >') }}</td>
+							<td>
+								@if(is_null($ul->leave_status_id))
+									Pending
+								@else
+									{{ $ul->belongstooptleavestatus?->status }}
+								@endif
+							</td>
+							<td>
+								@if($ul->softcopy)
+									<a href="{{ asset('storage/leaves/'.$ul->softcopy) }}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="bi bi-file-richtext"></i></a>
+								@else
+									<!-- Button trigger modal -->
+									<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploaddoc_{{ $ul->id }}">
+										<i class="fa-solid fa-upload"></i>
+									</button>
+
+									<!-- Modal -->
+									<div class="modal fade" id="uploaddoc_{{ $ul->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploaddocLabel_{{ $ul->id }}" aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												{{ Form::open(['route' => ['uploaddoc', $ul->id], 'method' => 'patch', 'id' => 'form', 'autocomplete' => 'off', 'files' => true,  'data-toggle' => 'validator']) }}
+												<div class="modal-header">
+													<h1 class="modal-title fs-5" id="uploaddocLabel_{{ $ul->id }}">Upload Supporting Document</h1>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body text-center">
+
+													<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">
+														{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::file( 'document', ['class' => 'form-control form-control-sm form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}
+														</div>
+													</div>
+
+													<div class="form-group row m-2 {{ $errors->has('amend_note') ? 'has-error' : '' }}">
+														{{ Form::label( 'rem', 'Remarks : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::textarea( 'amend_note', @$value, ['class' => 'form-control form-control-sm', 'id' => 'rem', 'placeholder' => 'Remarks']) }}
+														</div>
+													</div>
+
+												</div>
+												<div class="modal-footer">
+														<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+														{{ Form::submit('Submit', ['class' => 'btn btn-sm btn-outline-secondary']) }}
+												</div>
+												{{ Form::close() }}
+											</div>
+										</div>
+									</div>
+								@endif
+							</td>
+							<td {!! ($ul->remarks)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.($ul->remarks).'"':NULL !!}>
+								{{ Str::limit($ul->remarks, 10, ' >') }}
+							</td>
+							@if((($me1 || $me2) && $deptid == 14) || $me5)
+							<td {!! ($ul->hasmanyleaveamend()?->first()?->amend_note)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.$ul->hasmanyleaveamend()?->first()?->amend_note.'"':NULL !!}>
+								{{ Str::limit($ul->hasmanyleaveamend()?->first()?->amend_note, 10, ' >') }}
+							</td>
 							@endif
-						</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->remarks)??' ' }}">{{ Str::limit($ul->remarks, 10, ' >') }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->hasmanyleaveamend()->first()?->amend_note)??' ' }}">{{ Str::limit($ul->hasmanyleaveamend()->first()?->amend_note, 10, ' >') }}</td>
-					</tr>
+						</tr>
+					@endif
 				@endforeach
 			</tbody>
 		</table>
+	</div>
 	@else
 	<p>No Current Leave</p>
 	@endif
@@ -210,6 +410,7 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 <p>&nbsp;</p>
 	<h5>Past Leaves</h5>
 	@if($paleave)
+	<div class="col-sm-12 table-responsive">
 		<table id="paleave" class="table table-sm table-hover" style="font-size:12px;">
 			<thead>
 				<tr>
@@ -223,8 +424,11 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 					<th>Duration</th>
 					<th>Reason</th>
 					<th>Status</th>
+					<th>Supp Doc</th>
 					<th>Remarks</th>
+					@if((($me1 || $me2) && $deptid == 14) || $me5)
 					<th>Remarks HR</th>
+					@endif
 				</tr>
 			</thead>
 			<tbody>
@@ -250,36 +454,128 @@ if ( ($ul->leave_type_id == 9) || ($ul->leave_type_id != 9 && $ul->half_type_id 
 	$dte = \Carbon\Carbon::parse($ul->date_time_end)->format('j M Y ');
 	$dper = $ul->period_day.' day/s';
 }
+
+if ($me1) {																				// hod
+	if ($deptid == 21) {																// hod | dept prod A
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+	} elseif($deptid == 28) {															// hod | not dept prod A | dept prod B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2;
+	} elseif($deptid == 14) {															// hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 3;
+	} elseif ($deptid == 23) {															// hod | not dept prod A | not dept prod B | not HR | not cust serv | puchasing
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 16 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 11 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 17;
+	} else {																			// hod | not dept prod A | not dept prod B | not HR | not cust serv | not puchasing | other dept
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid;
+	}
+} elseif($me2) {																		// not hod | asst hod
+	if($deptid == 14) {																	// not hod | not dept prod A | not dept prod B | HR
+		$ha = true;
+	} elseif($deptid == 6) {															// not hod | not dept prod A | not dept prod B | not HR | cust serv
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 7 || Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == 3;
+	}
+} elseif($me3) {																		// not hod | not asst hod | supervisor
+	if($branch == 1) {																	// not hod | not asst hod | supervisor | branch A
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	} elseif ($branch == 2) {															// not hod | not asst hod | supervisor | not branch A | branch B
+		$ha = Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->id == $deptid || (Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->category_id == 2 && Staff::find($ul->staff_id)?->belongstomanydepartment()?->wherePivot('main', 1)->first()?->branch_id == $branch);
+	}
+} elseif($me6) {																		// not hod | not asst hod | not supervisor | director
+	$ha = true;
+} elseif($me5) {																		// not hod | not asst hod | not supervisor | not director | admin
+	$ha = true;
+} else {
+	$ha = false;
+}
 ?>
-					<tr>
-						<td><a href="{{ route('staff.show', $ul->belongstostaff->id) }}">{{ $ul->belongstostaff->hasmanylogin()->where('active', 1)->first()?->username }}</a></td>
-						<td>{{ $ul->belongstostaff->name }}</td>
-						<td><a href="{{ route('hrleave.show', $ul->id) }}">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
-						<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
-						<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
-						<td>{{ $dts }}</td>
-						<td>{{ $dte }}</td>
-						<td>{{ $dper }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">{{ Str::limit($ul->reason, 10, ' >') }}</td>
-						<td>
-							@if(is_null($ul->leave_status_id))
-								Pending
-							@else
-								{{ $ul->belongstooptleavestatus?->status }}
+					@if( $ha )
+						<tr>
+							<td><a href="{{ route('staff.show', $ul->staff_id) }}" target="_blank">{{ App\Models\Login::where([['staff_id', $ul->staff_id], ['active', 1]])->first()->username ?? NULL }}</a></td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->belongstostaff?->name }}">
+								{{ Str::words($ul->belongstostaff?->name, 3, ' >') }}
+							</td>
+							<td><a href="{{ route('hrleave.show', $ul->id) }}" target="_blank">HR9-{{ str_pad( $ul->leave_no, 5, "0", STR_PAD_LEFT ) }}/{{ $ul->leave_year }}</a></td>
+							<td>{{ $ul->belongstooptleavetype?->leave_type_code }}</td>
+							<td>{{ Carbon::parse($ul->created_at)->format('j M Y') }}</td>
+							<td>{{ $dts }}</td>
+							<td>{{ $dte }}</td>
+							<td>{{ $dper }}</td>
+							<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ $ul->reason }}">{{ Str::limit($ul->reason, 10, ' >') }}</td>
+							<td>
+								@if(is_null($ul->leave_status_id))
+									Pending
+								@else
+									{{ $ul->belongstooptleavestatus?->status }}
+								@endif
+							</td>
+							<td>
+								@if($ul->softcopy)
+									<a href="{{ asset('storage/leaves/'.$ul->softcopy) }}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="bi bi-file-richtext"></i></a>
+								@else
+									<!-- Button trigger modal -->
+									<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploaddoc_{{ $ul->id }}">
+										<i class="fa-solid fa-upload"></i>
+									</button>
+
+									<!-- Modal -->
+									<div class="modal fade" id="uploaddoc_{{ $ul->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploaddocLabel_{{ $ul->id }}" aria-hidden="true">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												{{ Form::open(['route' => ['uploaddoc', $ul->id], 'method' => 'patch', 'id' => 'form', 'autocomplete' => 'off', 'files' => true,  'data-toggle' => 'validator']) }}
+												<div class="modal-header">
+													<h1 class="modal-title fs-5" id="uploaddocLabel_{{ $ul->id }}">Upload Supporting Document</h1>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body text-center">
+
+													<div class="form-group row m-2 {{ $errors->has('document') ? 'has-error' : '' }}">
+														{{ Form::label( 'doc', 'Upload Supporting Document : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::file( 'document', ['class' => 'form-control form-control-sm form-control-file', 'id' => 'doc', 'placeholder' => 'Supporting Document']) }}
+														</div>
+													</div>
+
+													<div class="form-group row m-2 {{ $errors->has('amend_note') ? 'has-error' : '' }}">
+														{{ Form::label( 'rem', 'Remarks : ', ['class' => 'col-sm-4 col-form-label'] ) }}
+														<div class="col-sm-8">
+															{{ Form::textarea( 'amend_note', @$value, ['class' => 'form-control form-control-sm', 'id' => 'rem', 'placeholder' => 'Remarks']) }}
+														</div>
+													</div>
+
+												</div>
+												<div class="modal-footer">
+														<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+														{{ Form::submit('Submit', ['class' => 'btn btn-sm btn-outline-secondary']) }}
+												</div>
+												{{ Form::close() }}
+											</div>
+										</div>
+									</div>
+								@endif
+							</td>
+							<td {!! ($ul->remarks)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.$ul->remarks.'"':NULL !!}>
+								{{ Str::limit($ul->remarks, 10, ' >') }}
+							</td>
+							@if((($me1 || $me2) && $deptid == 14) || $me5)
+							<td {!! ($ul->hasmanyleaveamend()?->first()?->amend_note)?'data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="'.$ul->hasmanyleaveamend()?->first()?->amend_note.'"':NULL !!}>
+								{{ Str::limit($ul->hasmanyleaveamend()?->first()?->amend_note, 10, ' >') }}
+							</td>
 							@endif
-						</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->remarks)??' ' }}">{{ Str::limit($ul->remarks, 10, ' >') }}</td>
-						<td data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-html="true" data-bs-title="{{ ($ul->hasmanyleaveamend()->first()?->amend_note)??' ' }}">{{ Str::limit($ul->hasmanyleaveamend()->first()?->amend_note, 10, ' >') }}</td>
-					</tr>
+						</tr>
+					@endif
 				@endforeach
 			</tbody>
 		</table>
 	@else
+	</div>
 	<p>No Past Leave</p>
 	@endif
 
 	<p>&nbsp;</p>
-	<div id="calendar"></div>
+	<div class="col-sm-12">
+		<div id="calendar"></div>
+	</div>
 </div>
 @endsection
 
@@ -315,7 +611,7 @@ $('#toleave').DataTable({
 					{ type: 'date', 'targets': [4,5,6] },
 					// { type: 'time', 'targets': [6] },
 				],
-	"order": [ 6, 'desc' ],
+	"order": [ 5, 'desc' ],
 	responsive: true
 })
 .on( 'length.dt page.dt order.dt search.dt', function ( e, settings, len ) {
@@ -325,12 +621,13 @@ $('#toleave').DataTable({
 );
 
 $('#paleave').DataTable({
-	"lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+	// "paging": false,
+	"lengthMenu": [ [100, 250, 500, -1], [100, 250, 500, "All"] ],
 	"columnDefs": [
 					{ type: 'date', 'targets': [4,5,6] },
 					// { type: 'time', 'targets': [6] },
 				],
-	"order": [ 6, 'desc' ],
+	"order": [ 5, 'desc' ],
 	responsive: true
 })
 .on( 'length.dt page.dt order.dt search.dt', function ( e, settings, len ) {
@@ -339,33 +636,50 @@ $('#paleave').DataTable({
 	});}
 );
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// fullcalendar cant use jquery
+var calendarEl = document.getElementById('calendar');
+var calendar = new FullCalendar.Calendar(calendarEl, {
+	aspectRatio: 1.0,
+	height: 2000,
+	initialView: 'multiMonthYear',
+	// initialView: 'dayGridMonth',
+	// multiMonthMaxColumns: 1,					// force a single column
+	headerToolbar: {
+		left: 'prev,next today',
+		center: 'title',
+		right: 'multiMonthYear,dayGridMonth,timeGridWeek'
+	},
+	weekNumbers: true,
+	themeSystem: 'bootstrap',
+	events: {
+		url: '{{ route('leaveevents') }}',
+		method: 'POST',
+		extraParams: {
+			_token: '{!! csrf_token() !!}',
+		},
+	},
+	eventDidMount: function(info) {
+		$(info.el).tooltip({
+		// var tooltip = new Tooltip(info.el, {
+			title: info.event.extendedProps.description,
+			placement: 'top',
+			trigger: 'hover',
+			container: 'body'
+		});
+	},
+	eventTimeFormat: { // like '14:30:00'
+		hour: '2-digit',
+		minute: '2-digit',
+		// second: '2-digit',
+		hour12: true
+	}
+});
+calendar.render();
+
+/////////////////////////////////////////////////////////////////////////////////////////
 @endsection
 
 @section('nonjquery')
-/////////////////////////////////////////////////////////////////////////////////////////
-// fullcalendar cant use jquery
-document.addEventListener('DOMContentLoaded', function() {
-	var calendarEl = document.getElementById('calendar');
-	var calendar = new FullCalendar.Calendar(calendarEl, {
-		aspectRatio: 1.0,
-		initialView: 'dayGridMonth',
-		weekNumbers: true,
-		themeSystem: 'bootstrap',
-		events: {
-			url: '{{ route('leaveevents') }}',
-			method: 'POST',
-			extraParams: {
-				_token: '{!! csrf_token() !!}',
-			},
-		},
-		failure: function() {
-			alert('There was an error while fetching leaves!');
-		},
-	});
-	calendar.render();
-	console.log(calendar.getOption('aspectRatio'));
-});
-
-/////////////////////////////////////////////////////////////////////////////////////////
 
 @endsection

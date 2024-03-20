@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -129,6 +130,11 @@ class Staff extends Authenticatable
 		return $this->hasMany(\App\Models\HumanResources\HROutstation::class, 'staff_id');
 	}
 
+	public function hasmanyoutstationattendance(): HasMany
+	{
+		return $this->hasMany(\App\Models\HumanResources\HROutstationAttendance::class, 'staff_id');
+	}
+
 	public function hasmanyhrdisciplinary(): HasMany
 	{
 		return $this->hasMany(\App\Models\HumanResources\HRDisciplinary::class, 'staff_id');
@@ -141,6 +147,16 @@ class Staff extends Authenticatable
 		return $this->belongsToMany(\App\Models\HumanResources\DepartmentPivot::class, 'pivot_staff_pivotdepts', 'staff_id', 'pivot_dept_id')->withPivot('main', 'id')->withTimestamps();
 	}
 
+	public function belongstomanyevaluatee(): BelongsToMany
+	{
+		return $this->belongsToMany(\App\Models\Staff::class, 'pivot_apoint_appraisals', 'evaluator_id', 'evaluatee_id')->withPivot('active', 'remark')->withTimestamps();
+	}
+
+	public function belongstomanyevaluator(): BelongsToMany
+	{
+		return $this->belongsToMany(\App\Models\Staff::class, 'pivot_apoint_appraisals', 'evaluatee_id', 'evaluator_id')->withPivot('active', 'remark')->withTimestamps();
+	}
+
 	// user got cross backup
 	public function crossbackupto(): BelongsToMany
 	{
@@ -151,6 +167,11 @@ class Staff extends Authenticatable
 	public function crossbackupfrom(): BelongsToMany
 	{
 		return $this->belongsToMany(Staff::class, 'pivot_cross_backups', 'backup_staff_id', 'staff_id')->withPivot('active')->withTimestamps();
+	}
+
+	public function belongstomanycicategoryitem(): BelongsToMany
+	{
+		return $this->belongsToMany(\App\Models\HumanResources\ConditionalIncentiveCategoryItem::class, 'pivot_staff_ci_category_item', 'staff_id', 'cicategory_item_id')->withPivot('id', 'created_at')->withTimestamps();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +226,10 @@ class Staff extends Authenticatable
 		return $this->belongsTo(\App\Models\HumanResources\OptDivision::class, 'div_id');
 	}
 
+	public function belongstoappraisalcategory(): BelongsTo
+	{
+		return $this->belongsTo(\App\Models\HumanResources\OptAppraisalCategories::class, 'appraisal_category_id');
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 }
-
-
